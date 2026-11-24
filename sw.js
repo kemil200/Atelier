@@ -1,5 +1,5 @@
 // Service worker : l'app fonctionne hors ligne une fois chargée.
-const VERSION = 'atelier-v3';
+const VERSION = 'atelier-v4';
 const SHELL = [
   './', './index.html', './styles.css', './manifest.json',
   './js/app.js', './js/core.js', './js/sessions.js', './js/biases.js', './js/lab.js', './js/quiz.js', './js/programs.js',
@@ -36,7 +36,7 @@ self.addEventListener('fetch', (e) => {
     return;
   }
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request, { cache: 'no-cache' })
       .then((r) => {
         if (r.ok) {
           const copy = r.clone();
