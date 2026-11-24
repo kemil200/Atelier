@@ -17,8 +17,8 @@
     { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
   ],
   "shortcuts": [
-    { "name": "Cohérence cardiaque", "url": "./?seance=coherence" },
-    { "name": "Descente en spirale", "url": "./?seance=spirale" },
-    { "name": "Recadrer une pensée", "url": "./?seance=recadrage" }
+    { "name": "SOS : soupir apaisant", "url": "./#seances/sos" },
+    { "name": "Biais du jour", "url": "./#accueil" },
+    { "name": "Glisser vers le sommeil", "url": "./#seances/sommeil" }
   ]
 }

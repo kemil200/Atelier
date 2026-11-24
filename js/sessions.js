@@ -4,9 +4,12 @@
 //  count  : nombre affiché en grand (null pour l'effacer)
 //  say    : texte prononcé (placeholders {cle} remplacés par les réponses)
 //  cap    : sous-titre affiché à la place de `say`
-//  input  : { type: 'text' | 'scale' | 'list', key, label, placeholder }
-//  breath : { in, hold, out, hold2, cycles, cues }
+//  input  : { type: 'text' | 'scale' | 'list' | 'choices', key, label, placeholder, options, multi, optional }
+//  breath : { in, hold, out, hold2, cycles, cues } ou { phases: [[libellé, secondes, cible, repère vocal]], cycles, cues }
+//  timer  : chronomètre affiché, en secondes
+//  when   : n'exécuter l'étape que si cette réponse existe
 //  wait   : silence après l'étape, en secondes
+import { DISTORTIONS } from './biases.js';
 
 export const FAMILIES = {
   apaiser: { label: 'Apaiser', color: 'var(--c-calm)' },
@@ -106,14 +109,16 @@ export const SESSIONS = [
     id: 'recadrage',
     title: 'Recadrer une pensée',
     family: 'penser',
-    minutes: 4,
+    minutes: 5,
     pitch: 'Examiner une pensée qui fait mal et en trouver une plus juste.',
-    phases: ['Situation', 'Pensée automatique', 'Faits pour et contre', 'Pensée alternative', 'Nouvelle mesure'],
+    phases: ['Situation', 'Pensée automatique', 'Pièges de pensée', 'Faits pour et contre', 'Pensée alternative', 'Nouvelle mesure'],
     why: "C'est la restructuration cognitive des thérapies cognitives et comportementales (TCC). On ne cherche pas à penser positif, mais à penser juste : confronter une pensée automatique aux faits réduit en général son intensité émotionnelle.",
     steps: [
       { v: 'stars', say: "Prenons quelques minutes pour regarder une pensée difficile de plus près, sans la juger. Notez d'abord la situation, en une phrase.", input: { type: 'text', key: 'situation', label: 'La situation', placeholder: 'Où, quand, avec qui ?' } },
       { say: 'Quelle pensée vous est venue à ce moment-là ? Écrivez-la telle qu’elle s’est présentée, même si elle paraît excessive.', input: { type: 'text', key: 'pensee', label: 'La pensée automatique', placeholder: 'Ex. : je vais tout rater' } },
       { say: 'À quel point y croyez-vous, en ce moment ?', input: { type: 'scale', key: 'croyance', label: 'Croyance dans cette pensée (0 à 10)' } },
+      { say: 'Reconnaissez-vous un de ces pièges de pensée ? Il peut y en avoir plusieurs, ou aucun.', input: { type: 'choices', key: 'pieges', multi: true, optional: true, label: 'Pièges de pensée repérés', options: DISTORTIONS.map((d) => d.name) } },
+      { when: 'piegeQ', say: 'Face à ce piège, une question utile : {piegeQ}', wait: 5 },
       { say: 'Vous avez noté : {pensee}. Regardons les faits. Qu’est-ce qui soutient cette pensée ?', input: { type: 'text', key: 'pour', label: 'Les faits qui la soutiennent' } },
       { say: 'Et qu’est-ce qui ne colle pas avec elle ? Un fait, une exception, ce que dirait un ami bienveillant.', input: { type: 'text', key: 'contre', label: 'Les faits qui la contredisent' } },
       { say: 'Si un ami proche avait cette pensée dans la même situation, que lui diriez-vous ? Écrivez une pensée plus juste, plus équilibrée.', input: { type: 'text', key: 'alternative', label: 'Une pensée plus juste', placeholder: 'Ex. : je suis préparé, et même si tout n’est pas parfait…' } },
@@ -242,6 +247,135 @@ export const SESSIONS = [
       { say: 'Ouvrez grand les yeux, souriez, et allez-y.', wait: 1 },
     ],
   },
+  {
+    id: 'sos',
+    title: 'SOS : soupir apaisant',
+    family: 'apaiser',
+    minutes: 1,
+    pitch: 'Une minute pour redescendre quand l’angoisse monte.',
+    phases: ['Explication du souffle', 'Cinq soupirs guidés'],
+    why: "Le « soupir physiologique » (double inspiration, longue expiration) vide mieux les poumons et ralentit le cœur. Dans une étude de Stanford (Balban et al., 2023), cinq minutes par jour de cette respiration amélioraient davantage l'humeur qu'une méditation de pleine conscience de même durée.",
+    steps: [
+      { v: 'breath', say: 'Inspirez par le nez, puis prenez une seconde petite inspiration par-dessus. Ensuite, expirez très lentement par la bouche. Suivez le cercle.', wait: 1 },
+      { breath: { phases: [['Inspirez', 2, 0.75, 'Inspirez…'], ['Encore un peu', 1, 1, 'Encore un peu…'], ['Expirez lentement', 6, 0, 'Expirez lentement…']], cycles: 5, cues: 3 } },
+      { v: 'stars', say: "C'est tout. Votre corps a reçu le signal que le danger est passé. Recommencez quand vous en avez besoin.", wait: 2 },
+    ],
+  },
+  {
+    id: 'carree',
+    title: 'Respiration carrée',
+    family: 'apaiser',
+    minutes: 3,
+    pitch: 'Quatre temps égaux pour retrouver le calme sous pression.',
+    phases: ['Installation', 'Dix carrés de respiration', 'Retour'],
+    why: "Inspirer, retenir, expirer, retenir : quatre secondes chacun. Le rythme régulier ralentit la respiration, et compter donne à l'esprit une tâche simple qui chasse les pensées parasites. C'est une technique enseignée aux soignants et aux secouristes pour garder la tête froide.",
+    steps: [
+      { v: 'breath', say: 'Asseyez-vous droit, les épaules basses. Nous allons respirer en carré : quatre temps pour inspirer, quatre pour retenir, quatre pour expirer, quatre pour retenir.', wait: 1 },
+      { breath: { in: 4, hold: 4, out: 4, hold2: 4, cycles: 10, cues: 2 } },
+      { v: 'stars', say: 'Relâchez le rythme. Respirez librement, et remarquez la stabilité qui s’est installée.', wait: 3 },
+    ],
+  },
+  {
+    id: 'sens',
+    title: 'Ancrage 5-4-3-2-1',
+    family: 'apaiser',
+    minutes: 3,
+    pitch: 'Revenir dans l’instant présent par les cinq sens.',
+    phases: ['Cinq choses vues', 'Quatre touchées', 'Trois entendues', 'Deux odeurs', 'Une saveur'],
+    why: "Cette technique sollicite les sens un par un pour ramener l'attention dans le présent. Très utilisée en cas de panique ou d'anxiété, elle interrompt la spirale des pensées en occupant l'esprit avec des perceptions concrètes.",
+    steps: [
+      { v: 'stars', say: "Quand les pensées s'emballent, les sens ramènent dans l'instant présent. Gardez les yeux ouverts, et regardez autour de vous.", wait: 2 },
+      { count: 5, say: 'Nommez cinq choses que vous voyez. Regardez-les vraiment : leur couleur, leur forme.', wait: 15 },
+      { count: 4, say: 'Quatre choses que vous pouvez toucher. Le tissu de vos vêtements, le sol sous vos pieds, l’air sur votre peau.', wait: 14 },
+      { count: 3, say: 'Trois sons que vous entendez. Proches, lointains, même très faibles.', wait: 13 },
+      { count: 2, say: 'Deux odeurs. Si rien ne vient, rappelez-vous deux odeurs que vous aimez.', wait: 11 },
+      { count: 1, say: 'Une saveur dans votre bouche, ou une chose que vous aimeriez goûter maintenant.', wait: 9 },
+      { count: null, say: 'Prenez une respiration lente. Vous êtes ici, maintenant. Remarquez si la tension a changé, même un peu.', wait: 3 },
+    ],
+  },
+  {
+    id: 'sommeil',
+    title: 'Glisser vers le sommeil',
+    family: 'hypnose',
+    minutes: 7,
+    sleep: true,
+    pitch: 'Vider sa tête, relâcher le corps, et s’endormir sans retour à l’éveil.',
+    phases: ['Déposer ses pensées', 'Relâchement du corps', 'Décompte lent', 'Glissement'],
+    why: "Écrire ce qui nous préoccupe libère l'esprit (effet Zeigarnik). Dans une étude de Scullin et al. (2018), noter sa liste de tâches du lendemain aidait à s'endormir plus vite. La séance se termine sans réveil : l'écran s'éteint doucement et la séance est enregistrée automatiquement.",
+    steps: [
+      { v: 'fixation', vo: { dim: 0.5 }, say: "Avant de dormir, déposez ici ce qui vous trotte dans la tête : une tâche, un souci. Votre esprit saura que c'est noté.", input: { type: 'list', key: 'soucis', label: 'Ce qui vous occupe l’esprit (facultatif)', placeholder: 'appeler le garage\nfinir le dossier…', optional: true } },
+      { vo: { dim: 0.7 }, say: "C'est noté, et ça peut attendre demain. Allongez-vous confortablement, et posez le téléphone près de vous.", wait: 4 },
+      { say: 'Prenez une inspiration un peu plus profonde… et expirez lentement, comme un long soupir.', wait: 6 },
+      { say: 'À chaque expiration, imaginez que votre corps s’enfonce un peu plus dans le matelas.', wait: 8 },
+      { say: 'Votre front se détend… vos paupières sont lourdes… votre mâchoire se relâche.', wait: 8 },
+      { say: 'Vos épaules s’abandonnent. Vos bras deviennent lourds, chauds, immobiles.', wait: 8 },
+      { vo: { dim: 0.85 }, say: 'Vos jambes, vos pieds… tout le corps se repose. Votre respiration ralentit d’elle-même.', wait: 8 },
+      { say: 'Je vais compter lentement de dix à un. Laissez-vous porter par les chiffres.', wait: 3 },
+      { say: 'Dix…', wait: 5 }, { say: 'Neuf…', wait: 5 }, { say: 'Huit… de plus en plus loin…', wait: 5 },
+      { say: 'Sept…', wait: 5 }, { say: 'Six…', wait: 5 }, { say: 'Cinq… tout est calme…', wait: 6 },
+      { say: 'Quatre…', wait: 6 }, { say: 'Trois…', wait: 6 }, { say: 'Deux…', wait: 6 }, { say: 'Un…', wait: 8 },
+      { vo: { dim: 1 }, say: 'Si des pensées passent, laissez-les passer, comme des nuages dans un ciel de nuit.', wait: 10 },
+      { say: 'Il n’y a nulle part où aller, rien à réussir. Juste le poids du corps, et le souffle qui va et vient.', wait: 12 },
+      { say: 'Laissez-vous glisser… doucement… vers le sommeil.', wait: 25 },
+    ],
+  },
+  {
+    id: 'gratitude',
+    title: 'Trois bonnes choses',
+    family: 'penser',
+    minutes: 3,
+    pitch: 'Entraîner l’esprit à remarquer aussi ce qui va bien.',
+    phases: ['Noter trois moments', 'Les revivre un par un', 'Ancrer la sensation'],
+    why: "Dans l'exercice des « trois bonnes choses » (Seligman et al., 2005), noter chaque soir trois choses qui se sont bien passées augmentait le bien-être et réduisait les symptômes dépressifs jusqu'à six mois plus tard. Il contrebalance le biais de négativité.",
+    steps: [
+      { v: 'glow', say: "Le cerveau retient facilement ce qui ne va pas. Cette séance l'entraîne à remarquer aussi ce qui va bien. Notez trois bonnes choses des dernières vingt-quatre heures, même petites.", input: { type: 'list', key: 'bonnes', label: 'Trois bonnes choses, une par ligne', placeholder: 'un café au soleil\nun message d’un ami…' } },
+      { say: 'Reprenons-les, une par une.', wait: 1 },
+      { when: 'bonnes1', say: 'Première : {bonnes1}. Revivez ce moment quelques secondes. Où étiez-vous ? Qu’avez-vous ressenti ?', wait: 8 },
+      { when: 'bonnes2', say: 'Deuxième : {bonnes2}. Qu’est-ce qui l’a rendue possible ? Vous, quelqu’un d’autre, un hasard ?', wait: 8 },
+      { when: 'bonnes3', say: 'Troisième : {bonnes3}. Laissez la sensation agréable s’installer dans le corps.', wait: 8 },
+      { say: 'Ces moments existaient déjà. Vous venez simplement de leur donner la place qu’ils méritent.', wait: 4 },
+    ],
+  },
+  {
+    id: 'decision',
+    title: 'Décider sans biais',
+    family: 'penser',
+    minutes: 5,
+    pitch: 'Passer une décision au crible des biais les plus courants.',
+    phases: ['La décision', 'Pré-mortem', 'Repartir de zéro', 'L’argument contraire', 'Le conseil à un ami', 'Règle 10-10-10'],
+    why: "Chaque question vise un biais : le pré-mortem de Gary Klein contre l'excès d'optimisme, « et si je partais de zéro ? » contre les coûts irrécupérables, l'argument contraire contre le biais de confirmation. On décide aussi plus sagement pour un ami que pour soi, et la règle 10-10-10 de Suzy Welch aide à prendre du recul.",
+    steps: [
+      { v: 'stars', say: 'Prenons une décision qui vous occupe, et passons-la au crible de quelques biais courants. Quelle est cette décision ?', input: { type: 'text', key: 'decision', label: 'La décision à prendre', placeholder: 'Ex. : changer de travail' } },
+      { say: 'Vers quelle option penchez-vous, pour l’instant ?', input: { type: 'text', key: 'penchant', label: 'Votre penchant actuel' } },
+      { say: "Premier test, contre l'excès d'optimisme. Imaginez qu'un an a passé. Vous avez suivi ce choix, et c'est un échec. Que s'est-il passé ?", input: { type: 'text', key: 'premortem', label: 'Pré-mortem : pourquoi est-ce que ça a échoué ?' } },
+      { say: 'Deuxième test, contre les coûts irrécupérables. Si vous partiez de zéro aujourd’hui, sans tenir compte de ce que vous avez déjà investi, feriez-vous le même choix ?', input: { type: 'choices', key: 'zero', label: 'En partant de zéro, même choix ?', options: ['Oui', 'Non', 'Je ne sais pas'] } },
+      { say: 'Troisième test, contre le biais de confirmation. Quel est le meilleur argument contre l’option que vous préférez ?', input: { type: 'text', key: 'argcontre', label: 'Le meilleur argument contraire' } },
+      { say: 'Quatrième test. Si votre meilleur ami vous exposait ce dilemme, que lui conseilleriez-vous ?', input: { type: 'text', key: 'ami', label: 'Le conseil que vous donneriez à un ami' } },
+      { say: 'Dernier test, la règle dix-dix-dix. Comment vous sentirez-vous face à ce choix dans dix minutes, dans dix mois, et dans dix ans ?', input: { type: 'text', key: 'dix', label: 'Dans 10 minutes, 10 mois, 10 ans' } },
+      { say: 'Votre penchant de départ était : {penchant}. Et le conseil à votre ami : {ami}.', wait: 4 },
+      { say: 'Si les deux vont dans le même sens, vous pouvez avancer plus sereinement. Sinon, accordez-vous un peu de temps. Vos notes sont dans le journal.', wait: 2 },
+    ],
+  },
+  {
+    id: 'demarrer',
+    title: 'Démarrer maintenant',
+    family: 'energie',
+    minutes: 4,
+    pitch: 'Contre la procrastination : un geste de deux minutes, tout de suite.',
+    phases: ['La tâche repoussée', 'Le plus petit geste', 'Nommer la résistance', '« Quand…, alors je… »', 'Deux minutes chrono'],
+    why: "La procrastination est surtout une façon d'éviter une émotion désagréable (Sirois et Pychyl). Réduire la tâche à un geste de deux minutes diminue la résistance. Formuler un plan « quand X, alors je Y » (intention de mise en œuvre, Gollwitzer) augmente nettement le passage à l'acte.",
+    steps: [
+      { v: 'horizon', vo: { light: 0.3 }, say: "On ne commence pas une tâche parce qu'on est motivé : la motivation vient souvent en commençant. Quelle tâche repoussez-vous ?", input: { type: 'text', key: 'tache', label: 'La tâche repoussée' } },
+      { say: 'Quel est le tout premier geste, si petit qu’il prend moins de deux minutes ? Ouvrir le fichier, sortir les affaires, écrire une phrase.', input: { type: 'text', key: 'geste', label: 'Le geste de deux minutes' } },
+      { vo: { light: 0.5 }, say: 'Remarquez ce que vous ressentez à l’idée de commencer. Ennui, peur de mal faire, fatigue ? Nommez-le simplement, sans le juger.', wait: 6 },
+      { say: 'Formulez maintenant votre plan ainsi : quand…, alors je… Par exemple : quand cette séance se termine, alors j’ouvre le document.', input: { type: 'text', key: 'quand', label: 'Quand…, alors je…' } },
+      { vo: { light: 0.8 }, say: 'Faisons-le ensemble. Je lance un chronomètre de deux minutes. Faites seulement ce premier geste : {geste}. Allez-y.', cap: 'Votre geste : {geste}', timer: 120 },
+      { vo: { light: 1 }, say: 'Deux minutes. Vous avez commencé, et c’est le plus dur. Continuez si l’élan est là, ou arrêtez-vous sans culpabilité : le premier pas est fait.', wait: 2 },
+    ],
+  },
 ];
+
+// Ordre d'affichage : par famille, puis par durée.
+export const FAMILY_ORDER = ['apaiser', 'hypnose', 'penser', 'energie'];
 
 export const BREATH_CUES = { in: 'Inspirez…', hold: 'Retenez…', out: 'Expirez…', hold2: 'Pause…' };

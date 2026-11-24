@@ -74,6 +74,22 @@ export class Ambient {
     }
   }
 
+  // Cloche douce (partiels inharmoniques, longue décroissance).
+  bell(ctx, dest) {
+    const t = ctx.currentTime;
+    [[432, 1], [1083, 0.35], [1660, 0.18], [2470, 0.08]].forEach(([f, a]) => {
+      const o = ctx.createOscillator();
+      o.frequency.value = f;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.22 * a, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 7);
+      o.connect(g).connect(dest);
+      o.start(t);
+      o.stop(t + 7.2);
+    });
+  }
+
   setNoise(v) {
     if (this.noiseGain) this.noiseGain.gain.value = v * 0.5;
   }

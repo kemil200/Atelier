@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Atelier de l'esprit</title>
-  <meta name="description" content="Séances courtes d'autohypnose, de respiration et de travail sur les pensées, guidées par une voix ElevenLabs.">
+  <meta name="description" content="Autohypnose, respiration, travail sur les pensées et biais cognitifs : séances courtes guidées par une voix, expériences et parcours.">
   <meta name="theme-color" content="#0b0e13">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -18,48 +18,150 @@
 </head>
 <body>
   <header class="top">
-    <a class="brand" href="#top"><img src="icons/icon.svg" alt="" width="26" height="26"> <span>Atelier de l'esprit</span></a>
-    <nav>
-      <a href="#seances">Séances</a>
-      <a href="#journal">Journal</a>
-      <a href="#reglages">Réglages</a>
-      <button id="install" class="btn small" hidden>Installer</button>
+    <a class="brand" href="#accueil"><img src="icons/icon.svg" alt="" width="26" height="26"> <span>Atelier de l'esprit</span></a>
+    <nav class="topnav" aria-label="Navigation principale">
+      <a href="#seances" data-nav="seances">Séances</a>
+      <a href="#biais" data-nav="biais">Biais</a>
+      <a href="#labo" data-nav="labo">Labo</a>
+      <a href="#quiz" data-nav="quiz">Quiz</a>
+      <a href="#parcours" data-nav="parcours">Parcours</a>
+      <a href="#journal" data-nav="journal">Journal</a>
+      <a href="#reglages" data-nav="reglages">Réglages</a>
     </nav>
+    <div class="top-actions">
+      <button id="install" class="btn small" hidden>Installer</button>
+      <a class="icon-link" href="#reglages" aria-label="Réglages" title="Réglages">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </a>
+    </div>
   </header>
 
-  <main id="top">
-    <section class="hero">
-      <p class="eyebrow">Autohypnose · Respiration · Thérapies cognitives</p>
-      <h1>Votre esprit apprend par la répétition. Voici de quoi l'entraîner.</h1>
-      <p class="lede">Dix séances de deux à six minutes, guidées par une voix et par des visuels lents. Vous regardez l'écran, vous écoutez, vous répondez quand on vous le demande. Tout reste sur votre appareil.</p>
-      <div class="stats" id="stats"></div>
-      <a class="btn primary" href="#seances">Choisir une séance</a>
-    </section>
+  <main>
+    <!-- ACCUEIL -->
+    <section class="page" data-page="accueil">
+      <div class="hero">
+        <p class="eyebrow">Autohypnose · Respiration · Biais cognitifs</p>
+        <h1>Votre esprit apprend par la répétition. Voici de quoi l'entraîner.</h1>
+        <p class="lede">Des séances de une à sept minutes guidées par une voix, des expériences pour découvrir vos biais, et des parcours pour en faire une habitude. Tout reste sur votre appareil.</p>
+        <div class="stats" id="stats"></div>
+      </div>
 
-    <section id="seances" class="block">
-      <h2>Séances courtes</h2>
-      <p class="lede">Choisissez selon ce dont vous avez besoin maintenant. Un casque améliore l'immersion, surtout pour l'autohypnose.</p>
-      <div class="legend" id="legend"></div>
-      <div class="chips" id="chips" role="tablist" aria-label="Séances"></div>
-      <article class="panel" id="panel" aria-live="polite"></article>
-    </section>
+      <div class="sos">
+        <div>
+          <p class="eyebrow">Besoin d'aide maintenant ?</p>
+          <p class="sos-t">Trois outils rapides quand ça déborde.</p>
+        </div>
+        <div class="row">
+          <a class="btn primary" href="#seances/sos">Soupir apaisant · 1 min</a>
+          <a class="btn" href="#seances/sens">Ancrage 5-4-3-2-1</a>
+          <a class="btn" href="#seances/coherence">Cohérence cardiaque</a>
+        </div>
+      </div>
 
-    <section class="block how">
-      <h2>Comment ça se passe</h2>
+      <div class="home-grid">
+        <article class="card tall" id="home-bias"></article>
+        <article class="card tall" id="home-program"></article>
+      </div>
+
+      <h2 class="mt">Ce que vous trouverez ici</h2>
       <div class="cards">
-        <div class="card"><span class="k">01</span><h3>Une voix qui guide</h3><p>Les textes sont lus par une voix ElevenLabs en français, générée une fois puis gardée en mémoire sur l'appareil. Sans clé, la voix du navigateur prend le relais.</p></div>
-        <div class="card"><span class="k">02</span><h3>Un écran qui accompagne</h3><p>Cercle de respiration, spirale, point de fixation, horizon, rivière : le visuel soutient l'attention sans clignoter.</p></div>
-        <div class="card"><span class="k">03</span><h3>Un son de fond</h3><p>Un bruit doux, et si vous le voulez des battements binauraux à écouter au casque.</p></div>
-        <div class="card"><span class="k">04</span><h3>Un avant, un après</h3><p>Vous notez votre tension au début et à la fin. Le journal garde la trace de vos progrès et de vos réponses.</p></div>
+        <a class="card link" href="#seances"><span class="k">17 séances</span><h3>Écouter et regarder</h3><p>Respiration, autohypnose, sommeil, recadrage des pensées, décisions, procrastination. Voix ElevenLabs et visuels plein écran.</p></a>
+        <a class="card link" href="#biais"><span class="k">44 biais</span><h3>Comprendre ses raccourcis</h3><p>Chaque biais expliqué avec un exemple du quotidien, un antidote et son lien avec le bien-être.</p></a>
+        <a class="card link" href="#labo"><span class="k">8 expériences</span><h3>Les ressentir</h3><p>De courtes expériences classiques de la psychologie, pour voir les biais agir sur vous.</p></a>
+        <a class="card link" href="#parcours"><span class="k">4 parcours</span><h3>En faire une habitude</h3><p>Stress, clarté d'esprit, sommeil, élan : une activité par jour, guidée.</p></a>
       </div>
     </section>
 
-    <section id="journal" class="block">
+    <!-- SÉANCES -->
+    <section class="page" data-page="seances" hidden>
+      <h2>Séances guidées</h2>
+      <p class="lede">Choisissez selon ce dont vous avez besoin maintenant. Un casque améliore l'immersion, surtout pour l'autohypnose.</p>
+      <div class="pills" id="fam-filter" role="tablist" aria-label="Filtrer par famille"></div>
+      <div class="chips" id="chips" role="tablist" aria-label="Séances"></div>
+      <article class="panel" id="panel" aria-live="polite"></article>
+
+      <div class="block">
+        <h2>Minuteur libre</h2>
+        <p class="lede">Un temps de silence avec un visuel et un fond sonore, ouvert et fermé par une cloche.</p>
+        <form class="timer-form" id="timer-form">
+          <label class="field">Durée
+            <select name="minutes"><option>3</option><option selected>5</option><option>10</option><option>15</option><option>20</option><option>30</option></select>
+          </label>
+          <label class="field">Visuel
+            <select name="visual">
+              <option value="stars">Ciel étoilé</option>
+              <option value="breathing">Cercle de respiration lente</option>
+              <option value="horizon">Horizon</option>
+              <option value="spiral">Spirale</option>
+              <option value="fixation">Point de fixation</option>
+              <option value="leaves">Rivière</option>
+            </select>
+          </label>
+          <label class="check"><input type="checkbox" name="show" checked> Afficher le temps restant</label>
+          <button class="btn primary">Lancer le minuteur</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- BIAIS -->
+    <section class="page" data-page="biais" hidden>
+      <h2>Votre cerveau prend des raccourcis</h2>
+      <p class="lede">Les biais cognitifs ne sont pas des défauts d'intelligence. Ce sont des raccourcis qui nous font gagner du temps et qui, parfois, nous trompent. Les connaître ne les supprime pas, mais permet de les repérer.</p>
+      <nav class="subnav" aria-label="Biais"><a href="#biais" class="on">Fiches</a><a href="#biais/pieges">Pièges de pensée</a><a href="#labo">Labo</a><a href="#quiz">Quiz</a></nav>
+
+      <h3 class="mt">Pourquoi les biais existent</h3>
+      <p class="hint">Chaque biais est la conséquence d'un des quatre problèmes que le cerveau doit résoudre en permanence.</p>
+      <div class="fam-cards" id="fam-cards"></div>
+
+      <div class="bias-tools">
+        <input type="search" id="bias-search" placeholder="Chercher un biais, un mot, une situation…" aria-label="Chercher un biais">
+        <div class="pills" id="bias-filter"></div>
+      </div>
+      <p class="hint" id="bias-count"></p>
+      <div class="bias-grid" id="bias-grid"></div>
+
+      <div class="block" id="pieges">
+        <h2>Pièges de pensée</h2>
+        <p class="lede">En thérapie cognitive (Aaron Beck, David Burns), on appelle « distorsions cognitives » ces façons de penser qui amplifient la détresse. Les repérer est la première étape pour les assouplir. La séance « Recadrer une pensée » vous aide à le faire.</p>
+        <div class="traps" id="traps"></div>
+        <div class="row"><a class="btn primary" href="#seances/recadrage">Recadrer une pensée</a></div>
+      </div>
+      <p class="hint credit">Classement inspiré du <a href="https://commons.wikimedia.org/wiki/File:Cognitive_bias_codex_en.svg" target="_blank" rel="noopener">Cognitive Bias Codex</a> (Buster Benson, John Manoogian III). Textes originaux de l'Atelier.</p>
+    </section>
+
+    <!-- LABO -->
+    <section class="page" data-page="labo" hidden>
+      <h2>Ressentez-les</h2>
+      <p class="lede">Huit expériences rapides, inspirées d'études classiques de psychologie. Répondez sincèrement et spontanément, puis découvrez ce qui s'est passé.</p>
+      <nav class="subnav" aria-label="Biais"><a href="#biais">Fiches</a><a href="#biais/pieges">Pièges de pensée</a><a href="#labo" class="on">Labo</a><a href="#quiz">Quiz</a></nav>
+      <div class="chips" id="lab-chips" role="tablist" aria-label="Expériences"></div>
+      <article class="panel single" id="lab-panel" aria-live="polite"></article>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="page" data-page="quiz" hidden>
+      <h2>Repérez le biais</h2>
+      <p class="lede">Huit situations du quotidien, tirées au hasard. À chaque fois, quel biais ou quel piège de pensée est à l'œuvre ?</p>
+      <nav class="subnav" aria-label="Biais"><a href="#biais">Fiches</a><a href="#biais/pieges">Pièges de pensée</a><a href="#labo">Labo</a><a href="#quiz" class="on">Quiz</a></nav>
+      <article class="panel single" id="quiz-panel"></article>
+    </section>
+
+    <!-- PARCOURS -->
+    <section class="page" data-page="parcours" hidden>
+      <h2>Parcours</h2>
+      <p class="lede">Une activité par jour, dans un ordre pensé pour progresser. Les activités se cochent toutes seules quand vous les terminez, où que vous les lanciez.</p>
+      <div id="programs"></div>
+    </section>
+
+    <!-- JOURNAL -->
+    <section class="page" data-page="journal" hidden>
       <h2>Votre journal</h2>
+      <div class="stats" id="journal-stats"></div>
       <div id="journal-body"></div>
     </section>
 
-    <section id="reglages" class="block">
+    <!-- RÉGLAGES -->
+    <section class="page" data-page="reglages" hidden>
       <h2>Réglages</h2>
       <form id="settings" class="settings" autocomplete="off" onsubmit="return false">
         <fieldset>
@@ -109,16 +211,35 @@
             <button type="button" class="btn ghost small" id="clear-cache">Vider le cache audio</button>
           </div>
         </fieldset>
-        <fieldset>
-          <legend>Son et écran</legend>
-          <label class="field">Bruit de fond doux <output name="noiseOut"></output>
-            <input type="range" name="noise" min="0" max="1" step="0.05">
-          </label>
-          <label class="check"><input type="checkbox" name="binaural"> Battements binauraux (au casque uniquement)</label>
-          <label class="check"><input type="checkbox" name="captions"> Afficher le texte à l'écran</label>
-          <label class="check"><input type="checkbox" name="reduceMotion"> Réduire les mouvements</label>
-          <label class="check"><input type="checkbox" name="fullscreen"> Passer en plein écran pendant les séances</label>
-        </fieldset>
+        <div class="stack">
+          <fieldset>
+            <legend>Son et écran</legend>
+            <label class="field">Bruit de fond doux <output name="noiseOut"></output>
+              <input type="range" name="noise" min="0" max="1" step="0.05">
+            </label>
+            <label class="check"><input type="checkbox" name="binaural"> Battements binauraux (au casque uniquement)</label>
+            <label class="check"><input type="checkbox" name="captions"> Afficher le texte à l'écran</label>
+            <label class="check"><input type="checkbox" name="reduceMotion"> Réduire les mouvements</label>
+            <label class="check"><input type="checkbox" name="fullscreen"> Passer en plein écran pendant les séances</label>
+          </fieldset>
+          <fieldset>
+            <legend>Rappel quotidien</legend>
+            <p class="hint">Ajoutez un rendez-vous quotidien à votre agenda (Google, Apple, Outlook) avec un lien vers l'app.</p>
+            <div class="row">
+              <label class="field">Heure <input type="time" name="reminderTime" value="20:30"></label>
+              <button type="button" class="btn" id="ics">Ajouter à mon agenda</button>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Vos données</legend>
+            <p class="hint">Journal, progrès et réglages restent sur cet appareil. Sauvegardez-les pour les transférer sur un autre appareil. La clé API n'est jamais incluse.</p>
+            <div class="row">
+              <button type="button" class="btn small" id="export-all">Sauvegarder</button>
+              <label class="btn small ghost file-btn">Restaurer<input type="file" id="import-all" accept="application/json" hidden></label>
+              <button type="button" class="btn small ghost" id="reset-all">Tout effacer</button>
+            </div>
+          </fieldset>
+        </div>
       </form>
     </section>
   </main>
@@ -127,6 +248,17 @@
     <p><strong>Important.</strong> Cette application est un outil de bien-être, pas un soin. Elle ne remplace pas un psychologue, un psychiatre ou un médecin. N'écoutez jamais une séance en conduisant. Évitez l'autohypnose en cas de psychose, d'épilepsie non stabilisée ou de trouble dissociatif sans avis médical.</p>
     <p>En cas de pensées suicidaires, appelez le <a href="tel:3114">3114</a> (24 h/24, gratuit), ou le 15 / 112 en cas d'urgence.</p>
   </footer>
+
+  <nav class="tabbar" aria-label="Navigation">
+    <a href="#accueil" data-nav="accueil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Accueil</a>
+    <a href="#seances" data-nav="seances"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>Séances</a>
+    <a href="#biais" data-nav="biais labo quiz"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg>Biais</a>
+    <a href="#parcours" data-nav="parcours"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19c4 0 4-6 8-6s4-6 8-6"/><circle cx="4" cy="19" r="1.5"/><circle cx="20" cy="7" r="1.5"/></svg>Parcours</a>
+    <a href="#journal" data-nav="journal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M9 9h6M9 13h6"/></svg>Journal</a>
+  </nav>
+
+  <!-- Fiche d'un biais -->
+  <dialog id="bias-dialog" class="sheet"><div id="bias-detail"></div></dialog>
 
   <!-- Séance plein écran -->
   <div id="session" class="session" hidden>
@@ -149,7 +281,7 @@
       <div id="s-ask-slot"></div>
       <div class="row end">
         <button type="button" class="btn ghost" id="s-ask-skip" hidden>Passer</button>
-        <button type="submit" class="btn primary">Continuer</button>
+        <button type="submit" class="btn primary" id="s-ask-ok">Continuer</button>
       </div>
     </form>
     <div class="s-card center" id="s-prep" hidden>
