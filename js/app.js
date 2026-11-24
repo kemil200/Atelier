@@ -40,22 +40,78 @@ function audio() {
   return ctx;
 }
 
-/* ---------- Navigation ---------- */
-const PAGES = ['accueil', 'seances', 'biais', 'labo', 'quiz', 'parcours', 'journal', 'reglages'];
-let lastPage = null;
+/* ---------- Navigation façon application ---------- */
+// Chaque écran a un titre et un parent (pour le bouton retour). Les listes ont un écran de détail.
+const ROUTES = {
+  accueil: { title: "Atelier de l'esprit" },
+  seances: { title: 'Séances', parent: '#accueil', detail: 'seance' },
+  seance: { parent: '#seances' },
+  minuteur: { title: 'Minuteur libre', parent: '#accueil' },
+  biais: { title: 'Biais cognitifs', parent: '#accueil', detail: 'fiche' },
+  fiche: { parent: '#biais' },
+  pieges: { title: 'Pièges de pensée', parent: '#biais' },
+  labo: { title: 'Labo', parent: '#biais', detail: 'experience' },
+  experience: { parent: '#labo' },
+  quiz: { title: 'Quiz', parent: '#biais' },
+  parcours: { title: 'Parcours', parent: '#accueil', detail: 'programme' },
+  programme: { parent: '#parcours' },
+  journal: { title: 'Journal', parent: '#accueil' },
+  reglages: { title: 'Réglages', parent: '#accueil' },
+};
+const stack = [];
+const scrolls = {};
+let current = null;
+
+function parse(hash) {
+  const [base0, param] = hash.replace(/^#\/?/, '').split('/');
+  const base = ROUTES[base0] && !['seance', 'fiche', 'experience', 'programme'].includes(base0) ? base0 : 'accueil';
+  const screen = param && ROUTES[base].detail ? ROUTES[base].detail : base;
+  return { base, screen, param, hash: `#${base}${param ? `/${param}` : ''}` };
+}
+
+function setTitle(t) {
+  $('#appbar-title').textContent = t;
+  document.title = t === "Atelier de l'esprit" ? t : `${t} · Atelier de l'esprit`;
+}
 
 function route() {
-  const [page0, param] = location.hash.replace(/^#\/?/, '').split('/');
-  const page = PAGES.includes(page0) ? page0 : 'accueil';
-  if (page !== 'biais' && $('#bias-dialog').open) $('#bias-dialog').close();
-  $$('.page').forEach((p) => (p.hidden = p.dataset.page !== page));
-  $$('[data-nav]').forEach((a) => a.classList.toggle('on', a.dataset.nav.split(' ').includes(page)));
-  if (page !== lastPage) scrollTo({ top: 0, behavior: 'instant' });
-  lastPage = page;
-  RENDER[page]?.(param);
+  const r = parse(location.hash || '#accueil');
+  const back = stack.length > 1 && stack[stack.length - 2] === r.hash;
+  if (current) scrolls[current] = scrollY;
+  if (back) stack.pop();
+  else if (stack[stack.length - 1] !== r.hash) stack.push(r.hash);
+  current = r.hash;
+
+  const def = ROUTES[r.screen];
+  $$('.screen').forEach((s) => {
+    const on = s.dataset.screen === r.screen;
+    s.hidden = !on;
+    if (on) {
+      s.classList.remove('enter', 'enter-back');
+      void s.offsetWidth;
+      s.classList.add(back ? 'enter-back' : 'enter');
+    }
+  });
+  $$('[data-nav]').forEach((a) => a.classList.toggle('on', a.dataset.nav.split(' ').includes(r.screen)));
+  document.body.dataset.screen = r.screen;
+  $('#back').hidden = r.screen === 'accueil';
+  $('#brand').hidden = r.screen !== 'accueil';
+  if (def.title) setTitle(def.title);
+  RENDER[r.screen]?.(r.param);
+  scrollTo({ top: back ? scrolls[r.hash] || 0 : 0, behavior: 'instant' });
 }
 addEventListener('hashchange', route);
 const go = (hash) => { if (location.hash === hash) route(); else location.hash = hash; };
+
+$('#back').onclick = () => {
+  if (stack.length > 1) history.back();
+  else {
+    const r = parse(location.hash);
+    const parent = ROUTES[r.screen].parent || '#accueil';
+    stack.length = 0;
+    location.replace(parent);
+  }
+};
 
 /* ---------- Accueil ---------- */
 function dayKey(d) { const x = new Date(d); return `${x.getFullYear()}-${x.getMonth()}-${x.getDate()}`; }
@@ -80,117 +136,74 @@ function statsHtml() {
     <div class="stat"><b>${journal.length}</b><span>${plural(journal.length, 'séance')}</span></div>
     <div class="stat"><b>${minutes}</b><span>minutes</span></div>
     <div class="stat"><b>${streak()}</b><span>jours de suite</span></div>
-    <div class="stat"><b>${avg == null ? '–' : (avg > 0 ? '−' : '+') + Math.abs(avg).toFixed(1)}</b><span>tension moyenne</span></div>
+    <div class="stat"><b>${avg == null ? '–' : (avg > 0 ? '−' : '+') + Math.abs(avg).toFixed(1)}</b><span>tension moy.</span></div>
     <div class="stat"><b>${p.read.length}/${BIASES.length}</b><span>biais lus</span></div>`;
 }
 
-function renderHome() {
-  $('#stats').innerHTML = statsHtml();
-  const b = biasOfTheDay();
-  const fam = BIAS_FAMILIES[b.fam];
-  const mine = progress.get().mine.includes(b.id);
-  $('#home-bias').style.setProperty('--fam', fam.color);
-  $('#home-bias').innerHTML = `
-    <p class="eyebrow">Biais du jour · ${fam.label}</p>
-    <h3>${esc(b.name)}</h3>
-    <p>${esc(b.def)}</p>
-    <p class="hint">${esc(b.ex)}</p>
-    <div class="row">
-      <a class="btn small" href="#biais/${b.id}">Lire la fiche</a>
-      ${b.lab ? `<a class="btn small ghost" href="#labo/${b.lab}">Vivre l'expérience</a>` : ''}
-      <button class="btn small ghost" id="home-mine">${mine ? 'Je me reconnais ✓' : 'Je me reconnais'}</button>
-    </div>`;
-  $('#home-mine').onclick = () => { progress.toggle('mine', b.id); renderHome(); };
-  renderHomeProgram();
-}
-
-function renderHomeProgram() {
-  const el = $('#home-program');
+function nextProgramStep() {
   const pr = PROGRAMS.find((p) => p.id === programs.active);
-  if (!pr) {
-    el.style.setProperty('--fam', 'var(--accent)');
-    el.innerHTML = `
-      <p class="eyebrow">Parcours</p>
-      <h3>Une activité par jour</h3>
-      <p>Choisissez un parcours de cinq ou sept jours : stress, clarté d'esprit, sommeil ou élan. L'app vous indique chaque jour quoi faire.</p>
-      <div class="row"><a class="btn small primary" href="#parcours">Choisir un parcours</a></div>`;
-    return;
-  }
+  if (!pr) return null;
   const done = programs.done[pr.id] || [];
-  const next = pr.days.findIndex((_, i) => !done.includes(i));
-  el.style.setProperty('--fam', pr.color);
-  el.innerHTML = `
-    <p class="eyebrow">Votre parcours · ${done.length}/${pr.days.length}</p>
-    <h3>${esc(pr.title)}</h3>
-    <div class="q-bar"><span style="width:${(done.length / pr.days.length) * 100}%"></span></div>
-    ${next < 0 ? '<p>Parcours terminé. Bravo !</p><div class="row"><a class="btn small" href="#parcours">Choisir le suivant</a></div>'
-      : `<p><strong>Jour ${next + 1} :</strong> ${esc(itemTitle(pr.days[next]))}</p><p class="hint">${esc(pr.days[next].note)}</p>
-      <div class="row"><a class="btn small primary" href="${itemHref(pr.days[next])}">Commencer</a><a class="btn small ghost" href="#parcours">Voir le parcours</a></div>`}`;
+  const i = pr.days.findIndex((_, k) => !done.includes(k));
+  return { pr, done, i };
 }
 
-/* ---------- Séances ---------- */
-let selected = store.get('selected', 'coherence');
+function renderHome() {
+  const h = new Date().getHours();
+  $('#greet').textContent = h < 5 ? 'Bonne nuit' : h < 12 ? 'Bonjour' : h < 18 ? 'Bon après-midi' : 'Bonsoir';
+  const date = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
+  $('#greet-date').textContent = date;
+  const s = streak();
+  $('#greet-sub').textContent = s > 1 ? `${s} jours de suite. Continuez comme ça.` : h >= 21 || h < 5 ? 'Une séance pour bien finir la journée ?' : 'Que voulez-vous faire aujourd’hui ?';
+  $('#tile-journal').textContent = journal.length ? `${journal.length} ${plural(journal.length, 'séance')}` : 'Vos progrès';
+  $('#stats').innerHTML = statsHtml();
+
+  const b = biasOfTheDay();
+  const hb = $('#home-bias');
+  hb.href = `#biais/${b.id}`;
+  hb.style.setProperty('--fam', BIAS_FAMILIES[b.fam].color);
+  hb.innerHTML = `<span class="ic" aria-hidden="true">💡</span><span class="tx"><span class="eyebrow">Biais du jour</span><strong>${esc(b.name)}</strong><span>${esc(b.def)}</span></span><span class="chev" aria-hidden="true">›</span>`;
+
+  const hp = $('#home-program');
+  const st = nextProgramStep();
+  if (!st) {
+    hp.href = '#parcours';
+    hp.style.setProperty('--fam', 'var(--c-mind)');
+    hp.innerHTML = `<span class="ic" aria-hidden="true">🧭</span><span class="tx"><span class="eyebrow">Parcours</span><strong>Une activité par jour</strong><span>Stress, clarté, sommeil ou élan : choisissez un programme.</span></span><span class="chev" aria-hidden="true">›</span>`;
+    $('#tile-program').textContent = '4 programmes';
+  } else if (st.i < 0) {
+    hp.href = '#parcours';
+    hp.style.setProperty('--fam', st.pr.color);
+    hp.innerHTML = `<span class="ic" aria-hidden="true">🏁</span><span class="tx"><span class="eyebrow">Parcours terminé</span><strong>${esc(st.pr.title)}</strong><span>Bravo ! Choisissez le suivant.</span></span><span class="chev" aria-hidden="true">›</span>`;
+    $('#tile-program').textContent = 'Terminé ✓';
+  } else {
+    const d = st.pr.days[st.i];
+    hp.href = itemHref(d);
+    hp.style.setProperty('--fam', st.pr.color);
+    hp.innerHTML = `<span class="ic" aria-hidden="true">🧭</span><span class="tx"><span class="eyebrow">Parcours · jour ${st.i + 1}/${st.pr.days.length}</span><strong>${esc(itemTitle(d))}</strong><span>${esc(d.note)}</span></span><span class="chev" aria-hidden="true">›</span>`;
+    $('#tile-program').textContent = `Jour ${st.i + 1}/${st.pr.days.length}`;
+  }
+}
+$('#show-warn').onclick = () => $('#welcome').showModal();
+
+/* ---------- Séances : liste et détail ---------- */
 let famFilter = 'tout';
 let before = 5;
 const sortedSessions = () => [...SESSIONS].sort((a, b) => FAMILY_ORDER.indexOf(a.family) - FAMILY_ORDER.indexOf(b.family) || a.minutes - b.minutes);
 const voiceLabel = () => (settings.engine === 'elevenlabs' && settings.apiKey && settings.voiceId ? 'Voix ElevenLabs' : 'Voix du navigateur · <a href="#reglages">configurer ElevenLabs</a>');
 
-function renderSessions(param) {
-  if (param && SESSIONS.some((s) => s.id === param)) {
-    selected = param;
-    store.set('selected', selected);
-    famFilter = 'tout';
-  }
+function renderSessions() {
   $('#fam-filter').innerHTML = [['tout', 'Toutes', 'var(--accent)'], ...FAMILY_ORDER.map((k) => [k, FAMILIES[k].label, FAMILIES[k].color])]
     .map(([k, l, c]) => `<button class="pill${famFilter === k ? ' on' : ''}" data-f="${k}" style="--fam:${c}">${l}</button>`).join('');
   const done = new Set(journal.map((e) => e.sid));
   $('#chips').innerHTML = sortedSessions().filter((s) => famFilter === 'tout' || s.family === famFilter).map((s) => `
-    <button class="chip${done.has(s.id) ? ' done' : ''}" role="tab" data-id="${s.id}" aria-selected="${s.id === selected}" style="--fam:${FAMILIES[s.family].color}">
-      <span class="t"><span class="dot"></span>${esc(s.title)}</span>
-      <span class="d">${s.minutes} min</span>
-    </button>`).join('');
-  renderPanel();
-  if (param) setTimeout(() => $('#panel').scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+    <a class="item" href="#seances/${s.id}" style="--fam:${FAMILIES[s.family].color}">
+      <span class="dot"></span>
+      <span class="tx"><strong>${esc(s.title)}${done.has(s.id) ? ' <em class="ok">✓</em>' : ''}</strong><span>${esc(s.pitch)}</span></span>
+      <span class="meta-r">${s.minutes} min</span>
+      <span class="chev" aria-hidden="true">›</span>
+    </a>`).join('');
 }
-
-function renderPanel() {
-  const s = SESSIONS.find((x) => x.id === selected) || SESSIONS[0];
-  const fam = FAMILIES[s.family];
-  const p = $('#panel');
-  p.style.setProperty('--fam', fam.color);
-  const related = BIASES.filter((b) => b.session === s.id);
-  p.innerHTML = `
-    <div>
-      <div class="meta"><p class="eyebrow">${fam.label} · ${s.minutes} min</p><p class="eyebrow">${s.steps.some((x) => x.input) ? 'Avec écriture' : 'Écoute seule'}</p></div>
-      <h3>${esc(s.title)}</h3>
-      <p>${esc(s.pitch)}</p>
-      <ol>${s.phases.map((x) => `<li>${esc(x)}</li>`).join('')}</ol>
-      ${s.sleep ? '<p class="hint">À écouter au lit : pas de question à la fin, la séance s’enregistre seule.</p>' : `
-      <label class="field">Votre niveau de tension en ce moment <output id="before-out">${before}</output>
-        <input type="range" id="before" min="0" max="10" step="1" value="${before}">
-      </label>`}
-      <div class="start">
-        <button class="btn primary" id="start">Commencer la séance</button>
-        <span class="hint">${voiceLabel()}</span>
-      </div>
-    </div>
-    <div class="why">
-      <p class="eyebrow">Pourquoi ça marche</p>
-      <p>${esc(s.why)}</p>
-      ${related.length ? `<p class="eyebrow">Biais travaillés</p><p>${related.map((b) => `<a href="#biais/${b.id}">${esc(b.name)}</a>`).join(' · ')}</p>` : ''}
-    </div>`;
-  $('#before')?.addEventListener('input', (e) => { before = +e.target.value; $('#before-out').textContent = before; });
-  $('#start').addEventListener('click', () => runSession(s, s.sleep ? null : before));
-}
-
-$('#chips').addEventListener('click', (e) => {
-  const b = e.target.closest('.chip');
-  if (!b) return;
-  selected = b.dataset.id;
-  store.set('selected', selected);
-  $$('#chips .chip').forEach((c) => c.setAttribute('aria-selected', c.dataset.id === selected));
-  renderPanel();
-});
 $('#fam-filter').addEventListener('click', (e) => {
   const b = e.target.closest('.pill');
   if (!b) return;
@@ -198,36 +211,57 @@ $('#fam-filter').addEventListener('click', (e) => {
   renderSessions();
 });
 
+function renderSessionDetail(id) {
+  const s = SESSIONS.find((x) => x.id === id);
+  if (!s) return go('#seances');
+  setTitle(s.title);
+  const fam = FAMILIES[s.family];
+  const p = $('#panel');
+  p.style.setProperty('--fam', fam.color);
+  const related = BIASES.filter((b) => b.session === s.id);
+  p.innerHTML = `
+    <div class="hero-mini"><p class="eyebrow"><span class="dot"></span>${fam.label} · ${s.minutes} min · ${s.steps.some((x) => x.input) ? 'avec écriture' : 'écoute seule'}</p>
+    <h2>${esc(s.title)}</h2>
+    <p class="lead">${esc(s.pitch)}</p></div>
+    <h3 class="section-t">Déroulé</h3>
+    <ol class="steps-list">${s.phases.map((x) => `<li>${esc(x)}</li>`).join('')}</ol>
+    <h3 class="section-t">Pourquoi ça marche</h3>
+    <p class="muted">${esc(s.why)}</p>
+    ${related.length ? `<h3 class="section-t">Biais travaillés</h3><div class="pills">${related.map((b) => `<a class="pill" href="#biais/${b.id}" style="--fam:${BIAS_FAMILIES[b.fam].color}">${esc(b.name)}</a>`).join('')}</div>` : ''}
+    <div class="sticky-cta">
+      ${s.sleep ? '<p class="hint">À écouter au lit : pas de question à la fin, la séance s’enregistre seule.</p>' : `
+      <label class="field">Votre tension en ce moment <output id="before-out">${before}</output>
+        <input type="range" id="before" min="0" max="10" step="1" value="${before}">
+      </label>`}
+      <button class="btn primary big" id="start">Commencer la séance</button>
+      <p class="hint center">${voiceLabel()}</p>
+    </div>`;
+  $('#before')?.addEventListener('input', (e) => { before = +e.target.value; $('#before-out').textContent = before; });
+  $('#start').addEventListener('click', () => runSession(s, s.sleep ? null : before));
+}
+
 $('#timer-form').addEventListener('submit', (e) => {
   e.preventDefault();
   const f = e.target;
   const min = +f.minutes.value;
   const v = f.visual.value;
-  const visual = v === 'breathing' ? 'breath' : v;
   runSession({
     id: 'minuteur', title: `Minuteur libre · ${min} min`, family: 'apaiser', minutes: min,
     steps: [
-      { v: visual, vo: v === 'fixation' ? { dim: 0.4 } : v === 'horizon' ? { light: 0.4 } : {}, bell: true, say: 'Installez-vous. Restez simplement avec votre respiration, jusqu’à la prochaine cloche.', wait: 1 },
-      { timer: min * 60, quiet: !f.show.checked, autoBreath: v === 'breathing', silent: true },
+      { v: v === 'breathing' ? 'breath' : v, vo: v === 'fixation' ? { dim: 0.4 } : v === 'horizon' ? { light: 0.4 } : {}, bell: true, say: 'Installez-vous. Restez simplement avec votre respiration, jusqu’à la prochaine cloche.', wait: 1 },
+      { timer: min * 60, quiet: !f.show.checked, autoBreath: v === 'breathing' },
       { bell: true, say: 'C’est terminé. Prenez un instant avant de reprendre vos activités.', wait: 3 },
     ],
   }, null);
 });
 
-/* ---------- Biais ---------- */
+/* ---------- Biais : liste et fiche ---------- */
 let biasFam = 'tout';
 let biasQuery = '';
 let biasOrder = BIASES;
 const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
-function renderBiases(param) {
-  drawBiases();
-  if (param === 'pieges') setTimeout(() => $('#pieges').scrollIntoView({ behavior: 'smooth' }), 60);
-  else if (param) openBias(param);
-  else if ($('#bias-dialog').open) $('#bias-dialog').close();
-}
-
-function drawBiases() {
+function renderBiases() {
   const p = progress.get();
   $('#fam-cards').innerHTML = Object.entries(BIAS_FAMILIES).map(([k, f]) => `
     <button class="fam-card${biasFam === k ? ' on' : ''}" data-f="${k}" style="--fam:${f.color}">
@@ -235,42 +269,41 @@ function drawBiases() {
       <strong>${f.label}</strong>
       <span>${esc(f.why)}</span>
     </button>`).join('');
-  $('#bias-filter').innerHTML = [['tout', 'Tous', 'var(--accent)'], ...Object.entries(BIAS_FAMILIES).map(([k, f]) => [k, f.label, f.color]), ['mine', `Mes biais (${p.mine.length})`, 'var(--c-energy)']]
+  $('#bias-filter').innerHTML = [['tout', 'Tous', 'var(--accent)'], ...Object.entries(BIAS_FAMILIES).map(([k, f]) => [k, f.label, f.color]), ['mine', `★ Mes biais (${p.mine.length})`, 'var(--c-energy)']]
     .map(([k, l, c]) => `<button class="pill${biasFam === k ? ' on' : ''}" data-f="${k}" style="--fam:${c}">${l}</button>`).join('');
   const q = norm(biasQuery.trim());
-  biasOrder = BIASES.filter((b) => (biasFam === 'tout' || b.fam === biasFam || (biasFam === 'mine' && p.mine.includes(b.id))))
+  biasOrder = BIASES.filter((b) => biasFam === 'tout' || b.fam === biasFam || (biasFam === 'mine' && p.mine.includes(b.id)))
     .filter((b) => !q || norm([b.name, b.en, b.def, b.ex].join(' ')).includes(q));
-  $('#bias-count').textContent = `${biasOrder.length} biais affiché${biasOrder.length > 1 ? 's' : ''} · ${p.read.length} lu${p.read.length > 1 ? 's' : ''} sur ${BIASES.length}`;
+  $('#bias-count').textContent = `${biasOrder.length} biais · ${p.read.length} lu${p.read.length > 1 ? 's' : ''} sur ${BIASES.length}`;
   $('#bias-grid').innerHTML = biasOrder.length ? biasOrder.map((b) => `
-    <a class="bias-card${p.read.includes(b.id) ? ' read' : ''}" href="#biais/${b.id}" style="--fam:${BIAS_FAMILIES[b.fam].color}">
-      <span class="eyebrow"><span class="dot"></span>${BIAS_FAMILIES[b.fam].short}${p.mine.includes(b.id) ? ' · ★' : ''}${b.lab ? ' · expérience' : ''}</span>
-      <strong>${esc(b.name)}</strong>
-      <span>${esc(b.def)}</span>
-    </a>`).join('') : `<p class="empty">${biasFam === 'mine' ? 'Aucun biais marqué. Ouvrez une fiche et cliquez sur « Je me reconnais ».' : 'Aucun biais ne correspond.'}</p>`;
-  $('#traps').innerHTML = DISTORTIONS.map((d) => `
-    <div class="trap"><strong>${esc(d.name)}</strong><span>${esc(d.ex)}</span><em>${esc(d.q)}</em></div>`).join('');
+    <a class="item${p.read.includes(b.id) ? ' read' : ''}" href="#biais/${b.id}" style="--fam:${BIAS_FAMILIES[b.fam].color}">
+      <span class="dot"></span>
+      <span class="tx"><strong>${esc(b.name)}${p.mine.includes(b.id) ? ' <em class="star">★</em>' : ''}</strong><span>${esc(b.def)}</span></span>
+      ${b.lab ? '<span class="meta-r">expérience</span>' : ''}
+      <span class="chev" aria-hidden="true">›</span>
+    </a>`).join('') : `<p class="empty">${biasFam === 'mine' ? 'Aucun biais marqué. Ouvrez une fiche et touchez « Je me reconnais ».' : 'Aucun biais ne correspond.'}</p>`;
 }
-
 $('#fam-cards').addEventListener('click', (e) => {
   const b = e.target.closest('.fam-card');
   if (!b) return;
   biasFam = biasFam === b.dataset.f ? 'tout' : b.dataset.f;
-  drawBiases();
-  $('#bias-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  renderBiases();
+  $('#bias-search').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 $('#bias-filter').addEventListener('click', (e) => {
   const b = e.target.closest('.pill');
   if (!b) return;
   biasFam = b.dataset.f;
-  drawBiases();
+  renderBiases();
 });
-$('#bias-search').addEventListener('input', (e) => { biasQuery = e.target.value; drawBiases(); });
+$('#bias-search').addEventListener('input', (e) => { biasQuery = e.target.value; renderBiases(); });
 
-function openBias(id) {
+function renderBiasDetail(id) {
   const b = BIASES.find((x) => x.id === id);
-  if (!b) return;
+  if (!b) return go('#biais');
   progress.add('read', id);
   emit('complete', { type: 'bias', id });
+  setTitle(b.name);
   const fam = BIAS_FAMILIES[b.fam];
   const p = progress.get();
   const examples = store.get('examples', {});
@@ -282,63 +315,77 @@ function openBias(id) {
   const el = $('#bias-detail');
   el.style.setProperty('--fam', fam.color);
   el.innerHTML = `
-    <div class="sheet-top"><p class="eyebrow"><span class="dot"></span>${fam.label}</p><button class="icon small" id="bd-close" aria-label="Fermer">✕</button></div>
-    <h3>${esc(b.name)}</h3>
+    <div class="hero-mini"><p class="eyebrow"><span class="dot"></span>${fam.label}</p>
+    <h2>${esc(b.name)}</h2>
     <p class="en">${esc(b.en)}</p>
-    <p class="def">${esc(b.def)}</p>
+    <p class="lead">${esc(b.def)}</p></div>
     <dl class="bias-dl">
       <dt>Exemple</dt><dd>${esc(b.ex)}</dd>
       <dt>Antidote</dt><dd>${esc(b.anti)}</dd>
       ${b.psy ? `<dt>Bien-être</dt><dd>${esc(b.psy)}</dd>` : ''}
     </dl>
-    <label class="field">Votre exemple personnel <span class="hint">(on retient mieux ce qu'on relie à soi)</span>
-      <textarea id="bd-example" rows="2" placeholder="Quand m'est-il arrivé de…">${esc(examples[id] || '')}</textarea>
-    </label>
-    <div class="row">
-      <button class="btn small${p.mine.includes(id) ? ' primary' : ''}" id="bd-mine">${p.mine.includes(id) ? 'Je me reconnais ✓' : 'Je me reconnais'}</button>
-      ${b.lab ? `<a class="btn small" href="#labo/${b.lab}">Vivre l'expérience</a>` : ''}
-      ${s ? `<a class="btn small" href="#seances/${s.id}">Séance : ${esc(s.title)}</a>` : ''}
+    <div class="actions">
+      <button class="btn${p.mine.includes(id) ? ' primary' : ''}" id="bd-mine">${p.mine.includes(id) ? '★ Je me reconnais' : '☆ Je me reconnais'}</button>
+      ${b.lab ? `<a class="btn" href="#labo/${b.lab}">Vivre l'expérience</a>` : ''}
+      ${s ? `<a class="btn" href="#seances/${s.id}">Séance : ${esc(s.title)}</a>` : ''}
     </div>
+    <label class="field">Votre exemple personnel <span class="hint">(on retient mieux ce qu'on relie à soi)</span>
+      <textarea id="bd-example" rows="3" placeholder="Quand m'est-il arrivé de…">${esc(examples[id] || '')}</textarea>
+    </label>
     <div class="sheet-nav">
-      <a href="#biais/${prev.id}">← ${esc(prev.name)}</a>
-      <a href="#biais/${next.id}">${esc(next.name)} →</a>
+      <a href="#biais/${prev.id}" data-replace>‹ ${esc(prev.name)}</a>
+      <a href="#biais/${next.id}" data-replace>${esc(next.name)} ›</a>
     </div>`;
-  const d = $('#bias-dialog');
-  if (!d.open) d.showModal();
-  $('#bd-close').onclick = () => d.close();
-  $('#bd-mine').onclick = () => { progress.toggle('mine', id); openBias(id); };
+  $('#bd-mine').onclick = () => {
+    progress.toggle('mine', id);
+    const on = progress.get().mine.includes(id);
+    $('#bd-mine').classList.toggle('primary', on);
+    $('#bd-mine').textContent = on ? '★ Je me reconnais' : '☆ Je me reconnais';
+  };
   $('#bd-example').oninput = (e) => {
     const ex = store.get('examples', {});
     ex[id] = e.target.value;
     store.set('examples', ex);
   };
-  drawBiases();
 }
-$('#bias-dialog').addEventListener('close', () => {
-  if (location.hash.startsWith('#biais/') && location.hash !== '#biais/pieges') history.replaceState(null, '', '#biais');
+
+// Fiche précédente / suivante : remplace l'écran au lieu de l'empiler.
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[data-replace]');
+  if (!a) return;
+  e.preventDefault();
+  stack.pop();
+  location.replace(a.getAttribute('href'));
 });
-$('#bias-dialog').addEventListener('click', (e) => { if (e.target === e.currentTarget) e.currentTarget.close(); });
+
+function renderTraps() {
+  $('#traps').innerHTML = DISTORTIONS.map((d) => `
+    <div class="trap"><strong>${esc(d.name)}</strong><span>${esc(d.ex)}</span><em>${esc(d.q)}</em></div>`).join('');
+}
 
 /* ---------- Labo et quiz ---------- */
-let currentLab = null;
-function renderLab(param) {
+function renderLabList() {
   const done = progress.get().labs;
-  const id = EXPERIMENTS.some((e) => e.id === param) ? param : currentLab || EXPERIMENTS[0].id;
-  const changed = id !== currentLab || !$('#lab-panel').innerHTML;
-  currentLab = id;
-  $('#lab-chips').innerHTML = EXPERIMENTS.map((e) => `
-    <button class="chip${done.includes(e.id) ? ' done' : ''}" data-id="${e.id}" aria-selected="${e.id === id}" style="--fam:${BIAS_FAMILIES[BIASES.find((b) => b.id === e.bias).fam].color}">
-      <span class="t"><span class="dot"></span>${esc(e.title)}</span><span class="d">${e.time}</span>
-    </button>`).join('');
-  if (changed) runExperiment(id, $('#lab-panel'));
-  if (param) setTimeout(() => $('#lab-chips').scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  $('#lab-chips').innerHTML = EXPERIMENTS.map((e) => {
+    const b = BIASES.find((x) => x.id === e.bias);
+    return `
+    <a class="item" href="#labo/${e.id}" style="--fam:${BIAS_FAMILIES[b.fam].color}">
+      <span class="dot"></span>
+      <span class="tx"><strong>${esc(e.title)}${done.includes(e.id) ? ' <em class="ok">✓</em>' : ''}</strong><span>${esc(b.name)}</span></span>
+      <span class="meta-r">${e.time}</span>
+      <span class="chev" aria-hidden="true">›</span>
+    </a>`;
+  }).join('');
 }
-$('#lab-chips').addEventListener('click', (e) => {
-  const b = e.target.closest('.chip');
-  if (!b) return;
-  currentLab = null;
-  go(`#labo/${b.dataset.id}`);
-});
+let labShown = null;
+function renderExperiment(id) {
+  const exp = EXPERIMENTS.find((e) => e.id === id);
+  if (!exp) return go('#labo');
+  setTitle(exp.title);
+  // En revenant d'une fiche, on retrouve l'expérience où on l'avait laissée.
+  if (labShown !== id || !$('#lab-panel').innerHTML) runExperiment(id, $('#lab-panel'));
+  labShown = id;
+}
 
 function renderQuizPage() {
   const el = $('#quiz-panel');
@@ -346,11 +393,11 @@ function renderQuizPage() {
   const p = progress.get();
   const best = p.quiz.length ? Math.max(...p.quiz.map((x) => x.score)) : null;
   el.innerHTML = `
-    <p class="eyebrow">Quiz</p>
-    <h3>Prêt à repérer les biais ?</h3>
-    <p>Pour chaque situation, choisissez le biais ou le piège de pensée en jeu. Une explication suit chaque réponse.</p>
+    <div class="hero-mini"><p class="eyebrow">8 questions</p>
+    <h2>Repérez le biais</h2>
+    <p class="lead">Pour chaque situation du quotidien, choisissez le biais ou le piège de pensée en jeu. Une explication suit chaque réponse.</p></div>
     ${best != null ? `<p class="hint">Meilleur score : ${best} / 8</p>` : ''}
-    <div class="row"><button class="btn primary" id="quiz-go">Commencer</button></div>`;
+    <button class="btn primary big" id="quiz-go">Commencer</button>`;
   $('#quiz-go').onclick = () => { el.dataset.started = '1'; renderQuiz(el); };
 }
 
@@ -369,37 +416,60 @@ function renderPrograms() {
   $('#programs').innerHTML = PROGRAMS.map((pr) => {
     const done = programs.done[pr.id] || [];
     const active = programs.active === pr.id;
-    const next = pr.days.findIndex((_, i) => !done.includes(i));
     return `
-    <article class="program${active ? ' active' : ''}" style="--fam:${pr.color}">
-      <div class="meta"><p class="eyebrow">${pr.days.length} jours · ${done.length}/${pr.days.length} faits</p>${active ? '<p class="eyebrow on">En cours</p>' : ''}</div>
-      <h3>${esc(pr.title)}</h3>
-      <p>${esc(pr.pitch)}</p>
-      <div class="q-bar"><span style="width:${(done.length / pr.days.length) * 100}%"></span></div>
-      ${active ? `<ol class="days">${pr.days.map((d, i) => `
-        <li class="${done.includes(i) ? 'done' : i === next ? 'next' : ''}">
-          <span class="day">J${i + 1}</span>
-          <span class="what"><strong>${esc(itemTitle(d))}</strong><span>${esc(d.note)}</span></span>
-          ${done.includes(i) ? '<span class="ok">✓</span>' : `<a class="btn small${i === next ? ' primary' : ' ghost'}" href="${itemHref(d)}">${i === next ? 'Commencer' : 'Ouvrir'}</a>`}
-        </li>`).join('')}</ol>
-        <div class="row"><button class="btn small ghost" data-reset="${pr.id}">Recommencer ce parcours</button></div>`
-      : `<div class="row"><button class="btn${programs.active ? '' : ' primary'}" data-start="${pr.id}">${done.length ? 'Reprendre' : 'Suivre ce parcours'}</button></div>`}
-    </article>`;
+    <a class="item program-item${active ? ' active' : ''}" href="#parcours/${pr.id}" style="--fam:${pr.color}">
+      <span class="dot"></span>
+      <span class="tx"><strong>${esc(pr.title)}</strong><span>${esc(pr.pitch)}</span>
+        <span class="q-bar"><span style="width:${(done.length / pr.days.length) * 100}%"></span></span></span>
+      <span class="meta-r">${active ? 'En cours' : `${done.length}/${pr.days.length}`}</span>
+      <span class="chev" aria-hidden="true">›</span>
+    </a>`;
   }).join('');
 }
-$('#programs').addEventListener('click', (e) => {
-  const s = e.target.closest('[data-start]');
-  const r = e.target.closest('[data-reset]');
-  if (s) { programs.active = s.dataset.start; savePrograms(); renderPrograms(); toast('Parcours activé. Il apparaît aussi sur l’accueil.'); }
-  if (r && confirm('Remettre ce parcours à zéro ?')) { programs.done[r.dataset.reset] = []; savePrograms(); renderPrograms(); }
-});
+
+function renderProgramDetail(id) {
+  const pr = PROGRAMS.find((p) => p.id === id);
+  if (!pr) return go('#parcours');
+  setTitle(pr.title);
+  const done = programs.done[pr.id] || [];
+  const active = programs.active === pr.id;
+  const next = pr.days.findIndex((_, i) => !done.includes(i));
+  const el = $('#program-detail');
+  el.style.setProperty('--fam', pr.color);
+  el.innerHTML = `
+    <div class="hero-mini"><p class="eyebrow"><span class="dot"></span>${pr.days.length} jours · ${done.length}/${pr.days.length} faits${active ? ' · en cours' : ''}</p>
+    <h2>${esc(pr.title)}</h2>
+    <p class="lead">${esc(pr.pitch)}</p>
+    <div class="q-bar"><span style="width:${(done.length / pr.days.length) * 100}%"></span></div></div>
+    ${active ? '' : `<button class="btn primary big" id="pr-start">${done.length ? 'Reprendre ce parcours' : 'Suivre ce parcours'}</button>`}
+    <ol class="days">${pr.days.map((d, i) => `
+      <li class="${done.includes(i) ? 'done' : active && i === next ? 'next' : ''}">
+        <a href="${itemHref(d)}">
+          <span class="day">J${i + 1}</span>
+          <span class="what"><strong>${esc(itemTitle(d))}</strong><span>${esc(d.note)}</span></span>
+          <span class="ok">${done.includes(i) ? '✓' : '›'}</span>
+        </a>
+      </li>`).join('')}</ol>
+    ${active ? `<button class="btn ghost small" id="pr-reset">Recommencer ce parcours</button>` : ''}`;
+  $('#pr-start')?.addEventListener('click', () => {
+    programs.active = pr.id;
+    savePrograms();
+    renderProgramDetail(id);
+    toast('Parcours activé. Il apparaît aussi sur l’accueil.');
+  });
+  $('#pr-reset')?.addEventListener('click', () => {
+    if (!confirm('Remettre ce parcours à zéro ?')) return;
+    programs.done[pr.id] = [];
+    savePrograms();
+    renderProgramDetail(id);
+  });
+}
 
 bus.addEventListener('complete', (e) => {
   const { type, id } = e.detail;
-  if (type === 'lab') $(`#lab-chips [data-id="${id}"]`)?.classList.add('done');
   progress.update((p) => { p.days = [...new Set([...(p.days || []), new Date().toISOString()])].slice(-400); });
   const pr = PROGRAMS.find((p) => p.id === programs.active);
-  if (!pr || type === 'bias' && !pr.days.some((d) => d.type === 'bias' && d.id === id)) return;
+  if (!pr) return;
   const done = programs.done[pr.id] || [];
   const i = pr.days.findIndex((d, k) => !done.includes(k) && d.type === type && d.id === id);
   if (i < 0) return;
@@ -425,7 +495,7 @@ function renderJournal() {
     <div class="stat"><b>${p.quiz.length ? Math.max(...p.quiz.map((x) => x.score)) + '/8' : '–'}</b><span>meilleur quiz</span></div>`;
   const el = $('#journal-body');
   if (!journal.length) {
-    el.innerHTML = '<p class="empty">Aucune séance pour l\'instant. Votre première trace apparaîtra ici.</p>';
+    el.innerHTML = '<p class="empty">Aucune séance pour l\'instant. Votre première trace apparaîtra ici.</p><a class="btn primary big" href="#seances">Choisir une séance</a>';
     return;
   }
   const pts = journal.filter((e) => e.avant != null && e.apres != null).slice(-20);
@@ -945,16 +1015,22 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
 const RENDER = {
   accueil: renderHome,
   seances: renderSessions,
+  seance: renderSessionDetail,
   biais: renderBiases,
-  labo: renderLab,
+  fiche: renderBiasDetail,
+  pieges: renderTraps,
+  labo: renderLabList,
+  experience: renderExperiment,
   quiz: renderQuizPage,
   parcours: renderPrograms,
+  programme: renderProgramDetail,
   journal: renderJournal,
 };
 
-// Ancien raccourci du manifeste : ?seance=coherence
+// Anciens liens : ?seance=… et #biais/pieges
 const q = new URLSearchParams(location.search).get('seance');
 if (q && SESSIONS.some((s) => s.id === q)) history.replaceState(null, '', `${location.pathname}#seances/${q}`);
+if (location.hash === '#biais/pieges') history.replaceState(null, '', `${location.pathname}#pieges`);
 
 syncForm();
 updateCacheInfo();

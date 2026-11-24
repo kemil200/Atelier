@@ -52,7 +52,7 @@ export function renderQuiz(el, onDone) {
         });
         if (!ok) b.classList.add('wrong');
         const fb = $('#qf', el);
-        const link = BIASES.some((x) => x.id === q.a) ? `#biais/${q.a}` : '#biais/pieges';
+        const link = BIASES.some((x) => x.id === q.a) ? `#biais/${q.a}` : '#pieges';
         fb.innerHTML = `<p><strong>${ok ? 'Exact.' : `C’était : ${esc(NAMES[q.a])}.`}</strong> ${esc(q.e)} <a href="${link}">En savoir plus</a></p>
           <div class="row end"><button class="btn primary" id="next">${i + 1 < ROUND ? 'Suivante' : 'Voir le résultat'}</button></div>`;
         fb.hidden = false;

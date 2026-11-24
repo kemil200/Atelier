@@ -1,5 +1,5 @@
 // Service worker : l'app fonctionne hors ligne une fois chargée.
-const VERSION = 'atelier-v4';
+const VERSION = 'atelier-v5';
 const SHELL = [
   './', './index.html', './styles.css', './manifest.json',
   './js/app.js', './js/core.js', './js/sessions.js', './js/biases.js', './js/lab.js', './js/quiz.js', './js/programs.js',
