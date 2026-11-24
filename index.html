@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Atelier de l'esprit</title>
+  <meta name="description" content="Séances courtes d'autohypnose, de respiration et de travail sur les pensées, guidées par une voix ElevenLabs.">
+  <meta name="theme-color" content="#0b0e13">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="#top"><img src="icons/icon.svg" alt="" width="26" height="26"> <span>Atelier de l'esprit</span></a>
+    <nav>
+      <a href="#seances">Séances</a>
+      <a href="#journal">Journal</a>
+      <a href="#reglages">Réglages</a>
+      <button id="install" class="btn small" hidden>Installer</button>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <p class="eyebrow">Autohypnose · Respiration · Thérapies cognitives</p>
+      <h1>Votre esprit apprend par la répétition. Voici de quoi l'entraîner.</h1>
+      <p class="lede">Dix séances de deux à six minutes, guidées par une voix et par des visuels lents. Vous regardez l'écran, vous écoutez, vous répondez quand on vous le demande. Tout reste sur votre appareil.</p>
+      <div class="stats" id="stats"></div>
+      <a class="btn primary" href="#seances">Choisir une séance</a>
+    </section>
+
+    <section id="seances" class="block">
+      <h2>Séances courtes</h2>
+      <p class="lede">Choisissez selon ce dont vous avez besoin maintenant. Un casque améliore l'immersion, surtout pour l'autohypnose.</p>
+      <div class="legend" id="legend"></div>
+      <div class="chips" id="chips" role="tablist" aria-label="Séances"></div>
+      <article class="panel" id="panel" aria-live="polite"></article>
+    </section>
+
+    <section class="block how">
+      <h2>Comment ça se passe</h2>
+      <div class="cards">
+        <div class="card"><span class="k">01</span><h3>Une voix qui guide</h3><p>Les textes sont lus par une voix ElevenLabs en français, générée une fois puis gardée en mémoire sur l'appareil. Sans clé, la voix du navigateur prend le relais.</p></div>
+        <div class="card"><span class="k">02</span><h3>Un écran qui accompagne</h3><p>Cercle de respiration, spirale, point de fixation, horizon, rivière : le visuel soutient l'attention sans clignoter.</p></div>
+        <div class="card"><span class="k">03</span><h3>Un son de fond</h3><p>Un bruit doux, et si vous le voulez des battements binauraux à écouter au casque.</p></div>
+        <div class="card"><span class="k">04</span><h3>Un avant, un après</h3><p>Vous notez votre tension au début et à la fin. Le journal garde la trace de vos progrès et de vos réponses.</p></div>
+      </div>
+    </section>
+
+    <section id="journal" class="block">
+      <h2>Votre journal</h2>
+      <div id="journal-body"></div>
+    </section>
+
+    <section id="reglages" class="block">
+      <h2>Réglages</h2>
+      <form id="settings" class="settings" autocomplete="off" onsubmit="return false">
+        <fieldset>
+          <legend>Voix</legend>
+          <div class="seg" role="radiogroup">
+            <label><input type="radio" name="engine" value="elevenlabs"> ElevenLabs</label>
+            <label><input type="radio" name="engine" value="browser"> Voix du navigateur</label>
+          </div>
+          <div class="eleven-only">
+            <label class="field">Clé API ElevenLabs
+              <input type="password" name="apiKey" placeholder="sk_…" spellcheck="false">
+            </label>
+            <p class="hint">Créez une clé sur <a href="https://elevenlabs.io/app/settings/api-keys" target="_blank" rel="noopener">elevenlabs.io</a> (droit « Text to Speech » et « Voices : lecture »). Elle est enregistrée uniquement sur cet appareil et n'est envoyée qu'à api.elevenlabs.io.</p>
+            <div class="row">
+              <label class="field grow">Voix
+                <select name="voiceId"><option value="">Chargez vos voix…</option></select>
+              </label>
+              <button type="button" class="btn" id="load-voices">Charger mes voix</button>
+            </div>
+            <label class="field">Ou un identifiant de voix
+              <input type="text" name="voiceIdManual" placeholder="ID de voix de la bibliothèque ElevenLabs" spellcheck="false">
+            </label>
+            <label class="field">Modèle
+              <select name="model">
+                <option value="eleven_multilingual_v2">Multilingual v2 — meilleure qualité en français</option>
+                <option value="eleven_flash_v2_5">Flash v2.5 — plus rapide, deux fois moins de crédits</option>
+              </select>
+            </label>
+            <label class="field">Stabilité de la voix <output name="stabilityOut"></output>
+              <input type="range" name="stability" min="0.3" max="0.9" step="0.05">
+            </label>
+          </div>
+          <div class="browser-only">
+            <label class="field">Voix française du navigateur
+              <select name="browserVoice"><option value="">Automatique</option></select>
+            </label>
+          </div>
+          <label class="field">Débit <output name="speedOut"></output>
+            <input type="range" name="speed" min="0.7" max="1.2" step="0.05">
+          </label>
+          <label class="field">Volume de la voix <output name="voiceVolumeOut"></output>
+            <input type="range" name="voiceVolume" min="0.2" max="1" step="0.05">
+          </label>
+          <div class="row">
+            <button type="button" class="btn" id="test-voice">Écouter un exemple</button>
+            <span class="hint" id="cache-info"></span>
+            <button type="button" class="btn ghost small" id="clear-cache">Vider le cache audio</button>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Son et écran</legend>
+          <label class="field">Bruit de fond doux <output name="noiseOut"></output>
+            <input type="range" name="noise" min="0" max="1" step="0.05">
+          </label>
+          <label class="check"><input type="checkbox" name="binaural"> Battements binauraux (au casque uniquement)</label>
+          <label class="check"><input type="checkbox" name="captions"> Afficher le texte à l'écran</label>
+          <label class="check"><input type="checkbox" name="reduceMotion"> Réduire les mouvements</label>
+          <label class="check"><input type="checkbox" name="fullscreen"> Passer en plein écran pendant les séances</label>
+        </fieldset>
+      </form>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p><strong>Important.</strong> Cette application est un outil de bien-être, pas un soin. Elle ne remplace pas un psychologue, un psychiatre ou un médecin. N'écoutez jamais une séance en conduisant. Évitez l'autohypnose en cas de psychose, d'épilepsie non stabilisée ou de trouble dissociatif sans avis médical.</p>
+    <p>En cas de pensées suicidaires, appelez le <a href="tel:3114">3114</a> (24 h/24, gratuit), ou le 15 / 112 en cas d'urgence.</p>
+  </footer>
+
+  <!-- Séance plein écran -->
+  <div id="session" class="session" hidden>
+    <canvas id="stage"></canvas>
+    <div class="s-top">
+      <div>
+        <p class="eyebrow" id="s-step">Étape 1 sur 10</p>
+        <p class="s-title" id="s-title"></p>
+      </div>
+      <div class="s-ctrl">
+        <button class="icon" id="s-pause" aria-label="Pause" title="Pause">❚❚</button>
+        <button class="icon" id="s-skip" aria-label="Passer l'étape" title="Passer l'étape">⏭</button>
+        <button class="icon" id="s-quit" aria-label="Quitter" title="Quitter">✕</button>
+      </div>
+    </div>
+    <div class="s-progress"><span id="s-bar"></span></div>
+    <p class="caption" id="caption"></p>
+    <form class="s-card" id="s-ask" hidden>
+      <label id="s-ask-label" for="s-ask-field"></label>
+      <div id="s-ask-slot"></div>
+      <div class="row end">
+        <button type="button" class="btn ghost" id="s-ask-skip" hidden>Passer</button>
+        <button type="submit" class="btn primary">Continuer</button>
+      </div>
+    </form>
+    <div class="s-card center" id="s-prep" hidden>
+      <p class="eyebrow">Préparation</p>
+      <p id="s-prep-text">Préparation de la voix…</p>
+      <div class="meter"><span id="s-prep-bar"></span></div>
+    </div>
+    <form class="s-card" id="s-end" hidden>
+      <p class="eyebrow">Séance terminée</p>
+      <h3>Comment vous sentez-vous maintenant ?</h3>
+      <label class="field">Niveau de tension <output id="s-after-out">5</output>
+        <input type="range" id="s-after" min="0" max="10" step="1" value="5">
+      </label>
+      <p class="hint" id="s-before-note"></p>
+      <div class="row end">
+        <button type="submit" class="btn primary">Enregistrer</button>
+      </div>
+    </form>
+    <div class="paused-veil" id="s-veil" hidden><p>En pause</p><button class="btn primary" id="s-resume">Reprendre</button></div>
+  </div>
+
+  <dialog id="welcome">
+    <form method="dialog">
+      <p class="eyebrow">Avant de commencer</p>
+      <h3>Quelques précautions</h3>
+      <ul>
+        <li>Ces séances aident à se détendre et à travailler sur ses pensées. Elles ne remplacent pas un suivi par un professionnel de santé.</li>
+        <li>Ne les écoutez jamais en conduisant ou en utilisant une machine.</li>
+        <li>Pendant l'autohypnose, vous gardez le contrôle : vous pouvez ouvrir les yeux et arrêter à tout moment.</li>
+        <li>Les visuels bougent lentement et ne clignotent pas. Si vous êtes photosensible, activez « Réduire les mouvements ».</li>
+        <li>En cas de détresse, appelez le 3114 (prévention du suicide, 24 h/24).</li>
+      </ul>
+      <button class="btn primary" value="ok">J'ai compris</button>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "Atelier de l'esprit",
+  "short_name": "Atelier",
+  "description": "Séances courtes d'autohypnose, de respiration et de travail sur les pensées.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0e13",
+  "theme_color": "#0b0e13",
+  "categories": ["health", "lifestyle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "Cohérence cardiaque", "url": "./?seance=coherence" },
+    { "name": "Descente en spirale", "url": "./?seance=spirale" },
+    { "name": "Recadrer une pensée", "url": "./?seance=recadrage" }
+  ]
+}
