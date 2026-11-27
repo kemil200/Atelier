@@ -480,8 +480,11 @@ function renderAffirmations() {
   $('#aff-themes').innerHTML = [...THEMES, ...(st.custom.length ? [{ id: 'perso', title: `Mes phrases (${st.custom.length})`, color: 'var(--accent)' }] : [])]
     .map((t) => `<button class="pill${st.theme === t.id ? ' on' : ''}" data-theme="${t.id}" style="--fam:${t.color}">${t.icon ? t.icon + ' ' : ''}${esc(t.title)}</button>`).join('');
   const theme = THEMES.find((t) => t.id === st.theme);
-  $('#aff-theme-intro').textContent = theme ? theme.intro : 'Les affirmations que vous avez écrites.';
   const items = theme ? ALL_AFFIRMATIONS.filter((a) => a.theme === theme.id) : st.custom;
+  const allOn = items.length && items.every((a) => st.selected.includes(a.id));
+  $('#aff-theme-intro').innerHTML = `${esc(theme ? theme.intro : 'Les affirmations que vous avez écrites.')}
+    ${items.length ? `<span class="theme-bar"><span class="hint">${items.length} phrases · ${items.filter((a) => st.selected.includes(a.id)).length} choisies</span>
+    <button type="button" class="btn small${allOn ? ' ghost' : ''}" data-addall="${esc(st.theme)}">${allOn ? 'Tout retirer' : '★ Tout ajouter'}</button></span>` : ''}`;
   $('#aff-list').innerHTML = items.map((a) => {
     const on = st.selected.includes(a.id);
     return `
@@ -502,7 +505,15 @@ $('section[data-screen="affirmations"]').addEventListener('click', async (e) => 
   const sp = e.target.closest('[data-speak]');
   const th = e.target.closest('[data-theme]');
   const del = e.target.closest('[data-delete]');
-  if (t) {
+  const all = e.target.closest('[data-addall]');
+  if (all) {
+    const ids = (all.dataset.addall === 'perso' ? st.custom : ALL_AFFIRMATIONS.filter((a) => a.theme === all.dataset.addall)).map((a) => a.id);
+    const allOn = ids.every((id) => st.selected.includes(id));
+    st.selected = allOn ? st.selected.filter((id) => !ids.includes(id)) : [...st.selected, ...ids.filter((id) => !st.selected.includes(id))];
+    saveAff(st);
+    renderAffirmations();
+    toast(allOn ? 'Thème retiré de votre sélection.' : `${ids.length} affirmations dans votre sélection.`);
+  } else if (t) {
     const id = t.dataset.toggle;
     st.selected = st.selected.includes(id) ? st.selected.filter((x) => x !== id) : [...st.selected, id];
     saveAff(st);

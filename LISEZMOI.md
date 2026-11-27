@@ -7,7 +7,7 @@ En ligne : https://kemil200.github.io/Atelier/
 ## Contenu
 
 - **Reprogrammer** (inspiré de Psycho-Cybernétique de Maxwell Maltz et du Pouvoir de l'inconscient de Joseph Murphy, textes originaux) :
-  - **Affirmations** : 7 thèmes (richesse et abondance, image de soi, confiance, calme, réussite, bienveillance, énergie), 52 phrases en « je » et en « tu », phrases « pont » crédibles, affirmations personnelles, écoute maintenant ou au coucher.
+  - **Affirmations** : 9 thèmes (richesse et argent, mentalité d'abondance, travail et revenus, image de soi, confiance, calme, réussite, bienveillance, énergie), 80 phrases en « je » et en « tu », phrases « pont » crédibles, affirmations personnelles, écoute maintenant ou au coucher.
   - **5 séances d'image de soi** : théâtre de l'esprit, réveiller vos succès, nouvelle image de soi, une question pour la nuit, abondance et gratitude.
   - **7 exercices d'introspection guidée** : image de soi, relation à l'argent, succès, valeurs, vieille blessure, dialogue avec l'inconscient, lettre du futur moi. Chaque exercice propose une affirmation tirée de vos réponses.
   - Parcours **21 jours : nouvelle image de soi** et **7 jours vers l'abondance**.

@@ -659,3 +659,5 @@ body:not([data-screen="accueil"]) #install { display: none; }
 }
 .ex-field .opts.toggles { grid-template-columns: 1fr 1fr; gap: 0.4rem; }
 .ex-field .opts.toggles .opt { padding: 0.6rem 0.7rem; font-size: 0.92rem; }
+.theme-bar { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; margin-top: 0.7rem; }
+.theme-bar .hint { margin: 0; }

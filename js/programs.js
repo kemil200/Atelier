@@ -38,7 +38,7 @@ export const PROGRAMS = [
     days: [
       { type: 'intro', id: 'croyances-argent', note: 'D’où viennent vos croyances sur l’argent ?' },
       { type: 'session', id: 'abondance', note: 'Gratitude, vision et premier pas.' },
-      { type: 'affirm', id: 'affirm', note: 'Sélectionnez le thème « Richesse et abondance ».' },
+      { type: 'affirm', id: 'affirm', note: 'Choisissez vos phrases dans « Richesse et argent », « Mentalité d’abondance » et « Travail et revenus ».' },
       { type: 'intro', id: 'valeurs', note: 'Ce que l’argent doit servir chez vous.' },
       { type: 'session', id: 'theatre', note: 'Répéter une négociation ou une demande.' },
       { type: 'session', id: 'decision', note: 'Passer une décision financière au crible des biais.' },

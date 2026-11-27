@@ -3,8 +3,8 @@
 
 export const THEMES = [
   {
-    id: 'richesse', title: 'Richesse et abondance', color: 'var(--c-energy)', icon: '◈',
-    intro: "Une relation calme et lucide à l'argent : remarquer ce qu'on a, oser demander, agir avec méthode.",
+    id: 'richesse', title: 'Richesse et argent', color: 'var(--c-energy)', icon: '◈',
+    intro: "Une relation calme et lucide à l'argent : regarder ses comptes en face, épargner, dépenser selon ses valeurs, agir avec méthode.",
     items: [
       { je: "J'apprends chaque jour à gérer l'argent avec calme et lucidité.", tu: "Tu apprends chaque jour à gérer l'argent avec calme et lucidité.", pont: true },
       { je: "L'argent est un outil, et je deviens de plus en plus habile à m'en servir.", tu: "L'argent est un outil, et tu deviens de plus en plus habile à t'en servir.", pont: true },
@@ -15,6 +15,46 @@ export const THEMES = [
       { je: "J'ose saisir les occasions qui se présentent à moi.", tu: "Tu oses saisir les occasions qui se présentent à toi." },
       { je: "Je donne et je reçois avec aisance.", tu: "Tu donnes et tu reçois avec aisance." },
       { je: "Mon sentiment de valeur ne dépend pas de mon compte en banque.", tu: "Ton sentiment de valeur ne dépend pas de ton compte en banque." },
+      { je: "Je regarde mes comptes avec calme et curiosité.", tu: "Tu regardes tes comptes avec calme et curiosité.", pont: true },
+      { je: "Je peux apprendre tout ce qu'il faut savoir sur l'argent.", tu: "Tu peux apprendre tout ce qu'il faut savoir sur l'argent.", pont: true },
+      { je: "Chaque euro que je mets de côté construit ma liberté.", tu: "Chaque euro que tu mets de côté construit ta liberté." },
+      { je: "Je dépense en accord avec mes valeurs, pas avec mes impulsions.", tu: "Tu dépenses en accord avec tes valeurs, pas avec tes impulsions." },
+      { je: "Je fais travailler mon argent avec patience, sur le long terme.", tu: "Tu fais travailler ton argent avec patience, sur le long terme." },
+      { je: "Je me paie en premier : une part de chaque revenu est pour mon avenir.", tu: "Tu te paies en premier : une part de chaque revenu est pour ton avenir." },
+    ],
+  },
+  {
+    id: 'abondance', title: "Mentalité d'abondance", color: 'var(--c-mind)', icon: '❋',
+    intro: "Passer de la peur du manque à l'attention aux possibilités. Les chercheurs Mullainathan et Shafir (Scarcity, 2013) ont montré que le sentiment de manque rétrécit l'attention et pousse aux mauvaises décisions : la gratitude et la générosité aident à en sortir.",
+    items: [
+      { je: "Je remarque chaque jour une raison de dire merci.", tu: "Tu remarques chaque jour une raison de dire merci.", pont: true },
+      { je: "Je passe peu à peu de la peur du manque à la confiance.", tu: "Tu passes peu à peu de la peur du manque à la confiance.", pont: true },
+      { je: "Ce que j'ai aujourd'hui est une base solide pour construire.", tu: "Ce que tu as aujourd'hui est une base solide pour construire." },
+      { je: "L'abondance commence par l'attention que je porte à ce qui est déjà là.", tu: "L'abondance commence par l'attention que tu portes à ce qui est déjà là." },
+      { je: "Il y a assez de place pour ma réussite et pour celle des autres.", tu: "Il y a assez de place pour ta réussite et pour celle des autres." },
+      { je: "La réussite des autres m'inspire au lieu de m'inquiéter.", tu: "La réussite des autres t'inspire au lieu de t'inquiéter." },
+      { je: "Mon esprit est ouvert aux occasions qui se présentent.", tu: "Ton esprit est ouvert aux occasions qui se présentent." },
+      { je: "Je partage ce que j'ai, et cela me rend plus riche.", tu: "Tu partages ce que tu as, et cela te rend plus riche." },
+      { je: "Je reçois l'aide, les compliments et l'argent avec gratitude.", tu: "Tu reçois l'aide, les compliments et l'argent avec gratitude." },
+      { je: "Je mérite une vie confortable et sereine.", tu: "Tu mérites une vie confortable et sereine." },
+      { je: "Je laisse partir l'idée que l'argent est forcément rare ou mal acquis.", tu: "Tu laisses partir l'idée que l'argent est forcément rare ou mal acquis." },
+      { je: "Chaque jour, je trouve de nouvelles façons de créer de la valeur.", tu: "Chaque jour, tu trouves de nouvelles façons de créer de la valeur." },
+    ],
+  },
+  {
+    id: 'revenus', title: 'Travail et revenus', color: 'var(--b-vite)', icon: '▣',
+    intro: "Ce qui fait réellement grandir les revenus : des compétences utiles, de la visibilité, l'audace de demander et la constance.",
+    items: [
+      { je: "J'apprends chaque semaine quelque chose qui augmente ma valeur.", tu: "Tu apprends chaque semaine quelque chose qui augmente ta valeur.", pont: true },
+      { je: "Je peux créer plusieurs sources de revenus, pas à pas.", tu: "Tu peux créer plusieurs sources de revenus, pas à pas.", pont: true },
+      { je: "J'ose demander une juste rémunération pour mon travail.", tu: "Tu oses demander une juste rémunération pour ton travail." },
+      { je: "Je négocie avec calme, en connaissant ma valeur.", tu: "Tu négocies avec calme, en connaissant ta valeur." },
+      { je: "Je présente mon travail avec clarté et fierté.", tu: "Tu présentes ton travail avec clarté et fierté." },
+      { je: "Je cherche comment être vraiment utile, et la valeur suit.", tu: "Tu cherches comment être vraiment utile, et la valeur suit." },
+      { je: "Un refus ne dit rien de ma valeur : je redemande, ailleurs ou plus tard.", tu: "Un refus ne dit rien de ta valeur : tu redemandes, ailleurs ou plus tard." },
+      { je: "Je construis ma réputation par la qualité et la fiabilité.", tu: "Tu construis ta réputation par la qualité et la fiabilité." },
+      { je: "Mon réseau grandit quand j'aide les autres sincèrement.", tu: "Ton réseau grandit quand tu aides les autres sincèrement." },
+      { je: "Je transforme mes idées en actions concrètes.", tu: "Tu transformes tes idées en actions concrètes." },
     ],
   },
   {
