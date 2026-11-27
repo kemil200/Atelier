@@ -5,6 +5,7 @@ export const BEATS = {
   hypnose: 6, // thêta
   penser: 10,
   energie: 14, // bêta bas
+  soi: 6, // thêta
 };
 
 export class Ambient {

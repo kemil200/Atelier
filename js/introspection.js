@@ -1,0 +1,111 @@
+// Introspection profonde : exercices d'écriture guidée, une question par écran.
+// affirm : clé de la réponse qui devient une affirmation proposée à la fin.
+
+export const VALUES = ['Liberté', 'Famille', 'Sécurité', 'Créativité', 'Honnêteté', 'Apprentissage', 'Santé', 'Amitié', 'Justice', 'Réussite', 'Aventure', 'Spiritualité', 'Bienveillance', 'Indépendance', 'Transmission', 'Beauté'];
+
+export const EXERCISES = [
+  {
+    id: 'image-soi', title: 'Inventaire de l’image de soi', minutes: 10, color: 'var(--c-self)',
+    intro: 'Mettre des mots sur l’image que vous avez de vous aujourd’hui, comprendre d’où elle vient, puis choisir celle que vous voulez construire.',
+    why: "Pour Maxwell Maltz, nous ne dépassons jamais durablement l'image que nous avons de nous-mêmes. La première étape est de la voir clairement : elle s'est souvent formée par accident, à partir de remarques ou d'événements anciens.",
+    steps: [
+      { key: 'mots', type: 'text', q: 'Quels sont les trois premiers mots qui vous viennent pour vous décrire, sans réfléchir ?', hint: 'Écrivez-les tels qu’ils arrivent, même s’ils sont durs.' },
+      { key: 'origine', type: 'text', q: 'D’où vient cette image ? Une phrase entendue, une personne, un événement ?', hint: 'Souvent, on retrouve une remarque de l’enfance ou un échec marquant.' },
+      { key: 'note', type: 'scale', q: 'À quel point cette image vous aide-t-elle à vivre la vie que vous voulez ?', hint: '0 : elle me freine complètement. 10 : elle me porte.' },
+      { key: 'limite', type: 'text', q: 'Qu’est-ce que cette image vous empêche de faire ou d’oser ?' },
+      { key: 'siJe', type: 'text', q: 'Si vous vous voyiez comme une personne capable et digne de respect, que feriez-vous différemment dès cette semaine ?' },
+      { key: 'nouvelle', type: 'text', q: 'Décrivez en une phrase, au présent, l’image de vous que vous choisissez de construire.', hint: 'Ex. : « Je suis une personne fiable, qui ose dire ce qu’elle pense. »' },
+      { key: 'geste', type: 'text', q: 'Quel est le plus petit geste, demain, qui serait cohérent avec cette nouvelle image ?' },
+    ],
+    affirm: 'nouvelle',
+    outro: 'Une image de soi se construit comme elle s’est construite : par la répétition. Relisez votre phrase chaque jour, et faites le geste.',
+  },
+  {
+    id: 'croyances-argent', title: 'Votre relation à l’argent', minutes: 10, color: 'var(--c-energy)',
+    intro: 'Débusquer les croyances sur l’argent héritées de votre histoire, et choisir celles qui vous servent.',
+    why: "Nos comportements financiers sont largement guidés par des croyances apprises tôt (« l'argent ne fait pas le bonheur », « il faut se battre pour gagner sa vie »…). Les rendre conscientes permet de décider lesquelles garder. C'est l'idée de Joseph Murphy, sans la magie : l'inconscient suit les croyances qu'on y laisse.",
+    steps: [
+      { key: 'enfance', type: 'text', q: 'Enfant, qu’entendiez-vous dire sur l’argent autour de vous ?', hint: 'Les phrases exactes, si vous vous en souvenez.' },
+      { key: 'spontane', type: 'list', q: 'Complétez trois fois, sans réfléchir : « L’argent, c’est… »', hint: 'Une réponse par ligne.' },
+      { key: 'riches', type: 'text', q: 'Que pensez-vous, au fond, des personnes qui ont beaucoup d’argent ?', hint: 'Si votre jugement est négatif, une partie de vous ne voudra peut-être pas leur ressembler.' },
+      { key: 'limitante', type: 'text', q: 'Quelle croyance sur l’argent vous limite le plus aujourd’hui ?' },
+      { key: 'cout', type: 'text', q: 'Que vous a coûté cette croyance jusqu’ici ? Une occasion, une négociation, une tranquillité ?' },
+      { key: 'contre', type: 'text', q: 'Quels faits, ou quels exemples autour de vous, contredisent cette croyance ?' },
+      { key: 'choisie', type: 'text', q: 'Quelle croyance choisissez-vous à la place ? Formulez-la au présent, de façon crédible.', hint: 'Ex. : « J’apprends à gagner et à gérer l’argent avec sérénité. »' },
+      { key: 'action', type: 'text', q: 'Quelle action concrète, cette semaine, irait dans le sens de cette nouvelle croyance ?' },
+    ],
+    affirm: 'choisie',
+    outro: 'Une croyance change surtout quand les actes la démentent. Faites l’action, puis notez ce qui s’est passé.',
+  },
+  {
+    id: 'succes', title: 'L’inventaire de vos succès', minutes: 8, color: 'var(--c-mind)',
+    intro: 'Recenser vos réussites, petites et grandes, pour nourrir ce que Maltz appelait le « mécanisme de réussite ».',
+    why: "Le cerveau se souvient plus facilement des échecs (biais de négativité). Lister délibérément ses réussites rééquilibre la mémoire et renforce le sentiment d'efficacité personnelle, l'un des meilleurs prédicteurs de la persévérance (Bandura).",
+    steps: [
+      { key: 'liste', type: 'list', q: 'Notez trois réussites de votre vie, de n’importe quelle taille.', hint: 'Une par ligne. Un permis, une amitié réparée, un projet mené à bout…' },
+      { key: 'choisi', type: 'text', q: 'Choisissez-en une. Comment avez-vous fait pour y arriver ?' },
+      { key: 'qualites', type: 'text', q: 'Quelles qualités avez-vous montrées à ce moment-là ?' },
+      { key: 'ressenti', type: 'text', q: 'Que ressentiez-vous au moment où vous avez su que c’était réussi ?' },
+      { key: 'defi', type: 'text', q: 'Quel défi actuel pourrait bénéficier de ces mêmes qualités ?' },
+      { key: 'phrase', type: 'text', q: 'Écrivez une phrase qui relie ce succès à votre défi actuel.', hint: 'Ex. : « J’ai déjà su persévérer, je sais le refaire. »' },
+    ],
+    affirm: 'phrase',
+    outro: 'Gardez cette liste à portée de main. Les jours de doute, relisez-la avant d’agir.',
+  },
+  {
+    id: 'valeurs', title: 'Vos valeurs profondes', minutes: 7, color: 'var(--b-sens)',
+    intro: 'Identifier ce qui compte vraiment pour vous, pour ancrer vos affirmations dans quelque chose de solide.',
+    why: "Selon la théorie de l'auto-affirmation (Steele ; Cohen et Sherman, 2014), écrire sur ses valeurs importantes réduit la réaction défensive face aux menaces et améliore la résilience. Des affirmations reliées à ses valeurs sonnent plus vrai.",
+    steps: [
+      { key: 'choix', type: 'choices', options: VALUES, q: 'Choisissez les trois valeurs qui comptent le plus pour vous.', hint: 'Touchez pour sélectionner.' },
+      { key: 'pourquoi', type: 'text', q: 'Pourquoi la première de ces valeurs est-elle si importante pour vous ?' },
+      { key: 'vecu', type: 'text', q: 'Quand avez-vous vécu en accord avec elle, récemment ?' },
+      { key: 'ecart', type: 'text', q: 'Dans quel domaine de votre vie cette valeur est-elle moins présente ?' },
+      { key: 'phrase', type: 'text', q: 'Écrivez une phrase qui affirme cette valeur, au présent.', hint: 'Ex. : « Je choisis la liberté dans mes décisions de chaque jour. »' },
+    ],
+    affirm: 'phrase',
+    outro: 'Vos valeurs sont votre boussole. Quand une décision est difficile, demandez-vous laquelle elle sert.',
+  },
+  {
+    id: 'blessure', title: 'Désamorcer une vieille blessure', minutes: 10, color: 'var(--bad)',
+    intro: 'Revisiter un souvenir qui pèse encore, pour en détacher la conclusion que vous en aviez tirée sur vous-même.',
+    why: "Maltz parlait de « cicatrices émotionnelles » : un événement douloureux devient une conclusion sur soi (« je ne suis pas à la hauteur ») qui continue d'agir longtemps après. Examiner cette conclusion avec les yeux d'aujourd'hui permet souvent de la relâcher. Si le souvenir est traumatique, faites ce travail avec un professionnel.",
+    steps: [
+      { key: 'situation', type: 'text', q: 'Décrivez en quelques mots un souvenir qui vous fait encore mal. Restez factuel.', hint: 'Choisissez une blessure moyenne, pas la plus lourde.' },
+      { key: 'conclusion', type: 'text', q: 'Qu’en avez-vous conclu sur vous-même, à l’époque ?' },
+      { key: 'vrai', type: 'scale', q: 'Aujourd’hui, à quel point cette conclusion vous paraît-elle vraie ?', hint: '0 : pas du tout. 10 : totalement.' },
+      { key: 'autre', type: 'text', q: 'Quelles autres explications, qui ne parlent pas de votre valeur, pourrait-on donner à ce qui s’est passé ?' },
+      { key: 'message', type: 'text', q: 'Que diriez-vous à la personne que vous étiez à ce moment-là ?' },
+      { key: 'liberation', type: 'text', q: 'Écrivez une phrase pour vous libérer de cette conclusion.', hint: 'Ex. : « Ce qui s’est passé ne dit rien de ma valeur. Je me libère de cette idée. »', optional: true },
+    ],
+    affirm: 'liberation',
+    outro: 'Une blessure ne s’efface pas en un jour, mais chaque regard bienveillant que vous lui portez la rend un peu plus légère.',
+  },
+  {
+    id: 'dialogue', title: 'Dialogue avec l’inconscient', minutes: 8, color: 'var(--c-hyp)',
+    intro: 'Poser une question, puis écrire sans filtre, pour laisser émerger ce que vous savez déjà sans le savoir.',
+    why: "L'écriture libre (écrire vite, sans se relire, sans juger) court-circuite le censeur intérieur et fait remonter des idées peu accessibles d'habitude. Joseph Murphy y voyait un accès à l'inconscient ; les chercheurs parlent plutôt d'intuitions et de connaissances implicites. L'expérience est souvent étonnante.",
+    steps: [
+      { key: 'question', type: 'text', q: 'Quelle question voulez-vous poser à la partie la plus sage de vous-même ?', hint: 'Ex. : « De quoi ai-je vraiment besoin en ce moment ? »' },
+      { key: 'ecriture', type: 'long', q: 'Respirez trois fois, puis écrivez la réponse sans vous arrêter, sans vous relire, pendant deux minutes.', hint: 'Laissez venir les mots, même s’ils semblent sans rapport.' },
+      { key: 'surprise', type: 'text', q: 'Relisez. Qu’est-ce qui vous surprend dans ce que vous avez écrit ?' },
+      { key: 'message', type: 'text', q: 'Si vous résumiez ce message en une phrase, que dirait-elle ?' },
+      { key: 'action', type: 'text', q: 'Quelle petite action ce message vous invite-t-il à faire ?' },
+    ],
+    affirm: 'message',
+    outro: 'Vous pouvez poser la même question avant de dormir, avec la séance « Une question pour la nuit ».',
+  },
+  {
+    id: 'lettre', title: 'Lettre de votre futur moi', minutes: 10, color: 'var(--b-trop)',
+    intro: 'Écrire une lettre que vous adresse la personne que vous serez dans cinq ans, quand tout s’est bien passé.',
+    why: "Se sentir proche de son futur soi favorise les choix à long terme (Hal Hershfield). Écrire depuis le point de vue de ce futur rend l'objectif concret et active ce que Maltz appelait le « mécanisme de réussite » : un but net que l'esprit peut viser.",
+    steps: [
+      { key: 'ou', type: 'text', q: 'Dans cinq ans, tout s’est bien passé. Où êtes-vous, et à quoi ressemble une journée ordinaire ?' },
+      { key: 'fier', type: 'text', q: 'Pour quelle décision prise à partir d’aujourd’hui votre futur vous vous remercie-t-il le plus ?' },
+      { key: 'lettre', type: 'long', q: 'Écrivez la lettre qu’il vous adresse aujourd’hui. Commencez par « Cher moi d’aujourd’hui… ».', hint: 'Laissez-le vous encourager, vous rassurer, vous conseiller.' },
+      { key: 'conseil', type: 'text', q: 'Quel est le conseil le plus important de cette lettre, en une phrase ?' },
+    ],
+    affirm: 'conseil',
+    outro: 'Relisez cette lettre dans un mois. Vous pouvez aussi vivre cette rencontre avec la séance « Votre futur soi ».',
+  },
+];

@@ -6,13 +6,18 @@ En ligne : https://kemil200.github.io/Atelier/
 
 ## Contenu
 
-- **17 séances** (1 à 7 min) : SOS soupir apaisant, cohérence cardiaque, respiration carrée, ancrage 5-4-3-2-1, scan corporel, auto-compassion, ancre de calme, descente en spirale, lieu sûr, glisser vers le sommeil, recadrer une pensée (avec les pièges de pensée), feuilles sur la rivière, trois bonnes choses, décider sans biais, votre futur soi, démarrer maintenant, réveil énergisant.
+- **Reprogrammer** (inspiré de Psycho-Cybernétique de Maxwell Maltz et du Pouvoir de l'inconscient de Joseph Murphy, textes originaux) :
+  - **Affirmations** : 7 thèmes (richesse et abondance, image de soi, confiance, calme, réussite, bienveillance, énergie), 52 phrases en « je » et en « tu », phrases « pont » crédibles, affirmations personnelles, écoute maintenant ou au coucher.
+  - **5 séances d'image de soi** : théâtre de l'esprit, réveiller vos succès, nouvelle image de soi, une question pour la nuit, abondance et gratitude.
+  - **7 exercices d'introspection guidée** : image de soi, relation à l'argent, succès, valeurs, vieille blessure, dialogue avec l'inconscient, lettre du futur moi. Chaque exercice propose une affirmation tirée de vos réponses.
+  - Parcours **21 jours : nouvelle image de soi** et **7 jours vers l'abondance**.
+- **17 autres séances** (1 à 7 min) : SOS soupir apaisant, cohérence cardiaque, respiration carrée, ancrage 5-4-3-2-1, scan corporel, auto-compassion, ancre de calme, descente en spirale, lieu sûr, glisser vers le sommeil, recadrer une pensée (avec les pièges de pensée), feuilles sur la rivière, trois bonnes choses, décider sans biais, votre futur soi, démarrer maintenant, réveil énergisant.
 - **Minuteur libre** avec cloche, visuel et fond sonore.
 - **44 biais cognitifs** classés en 4 familles (inspiré du Cognitive Bias Codex), avec exemple, antidote, lien avec le bien-être, « je me reconnais » et exemple personnel.
 - **10 pièges de pensée** des thérapies cognitives (distorsions cognitives).
 - **Labo** : 8 expériences classiques (ancrage, cadrage, conjonction, sophisme du joueur, règle 2-4-6, taux de base, aversion à la perte, faux souvenirs).
 - **Quiz** : 20 situations, 8 tirées au hasard par partie.
-- **4 parcours** (stress, clarté, sommeil, élan) qui se cochent automatiquement.
+- **4 autres parcours** (stress, clarté, sommeil, élan) qui se cochent automatiquement.
 - **Journal** : tension avant/après, notes, courbe, séries de jours, export.
 - **Réglages** : voix, son, rappel quotidien (.ics), sauvegarde/restauration des données.
 
@@ -45,6 +50,8 @@ La clé est stockée dans le `localStorage` du navigateur et n'est envoyée qu'�
 - `js/lab.js` : expériences du labo.
 - `js/quiz.js` : quiz « Repérez le biais ».
 - `js/programs.js` : parcours.
+- `js/affirmations.js` : thèmes et affirmations.
+- `js/introspection.js` : exercices d'introspection.
 - `js/app.js` : navigation, pages, lecteur de séance, journal, réglages.
 - `js/core.js` : outils partagés (stockage, progrès, événements).
 - `js/voice.js`, `js/visuals.js`, `js/ambient.js` : voix, visuels plein écran, son.

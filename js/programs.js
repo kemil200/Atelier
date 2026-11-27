@@ -1,6 +1,50 @@
-// Parcours : une activité par jour. type = 'session' | 'lab' | 'quiz' | 'bias'.
+// Parcours : une activité par jour. type = 'session' | 'lab' | 'quiz' | 'bias' | 'intro' | 'affirm'.
 
 export const PROGRAMS = [
+  {
+    id: 'image-21',
+    title: '21 jours : nouvelle image de soi',
+    color: 'var(--c-self)',
+    pitch: "Inspiré de Psycho-Cybernétique : voir son image actuelle, en choisir une nouvelle, l'ancrer par l'imagination, les affirmations et l'action. Maltz observait qu'il faut environ 21 jours pour s'habituer à un changement ; les études récentes parlent plutôt de deux mois pour une vraie habitude (Lally, 2010). Ces 21 jours sont un excellent départ.",
+    days: [
+      { type: 'intro', id: 'image-soi', note: 'Voir clairement l’image que vous avez de vous.' },
+      { type: 'session', id: 'nouvelle-image', note: 'Rencontrer la personne que vous devenez.' },
+      { type: 'affirm', id: 'affirm', note: 'Choisissez cinq affirmations du thème « Image de soi », puis écoutez-les.' },
+      { type: 'intro', id: 'succes', note: 'Recenser vos réussites.' },
+      { type: 'session', id: 'succes-passes', note: 'Réveiller la sensation du succès.' },
+      { type: 'affirm', id: 'affirm', note: 'Ajoutez une affirmation écrite par vous.' },
+      { type: 'session', id: 'theatre', note: 'Répéter une situation importante dans votre théâtre intérieur.' },
+      { type: 'intro', id: 'blessure', note: 'Relâcher une vieille conclusion sur vous-même.' },
+      { type: 'session', id: 'compassion', note: 'Se parler avec douceur.' },
+      { type: 'affirm', id: 'affirm', note: 'Essayez la version « tu ».' },
+      { type: 'intro', id: 'valeurs', note: 'Ancrer vos affirmations dans vos valeurs.' },
+      { type: 'session', id: 'theatre', note: 'Nouvelle scène, nouvelle répétition.' },
+      { type: 'session', id: 'ancrage', note: 'Créer un raccourci vers le calme.' },
+      { type: 'affirm', id: 'affirm', note: 'Écoutez-les au coucher, au moment où l’esprit est le plus réceptif.' },
+      { type: 'intro', id: 'croyances-argent', note: 'Examiner vos croyances sur l’argent.' },
+      { type: 'session', id: 'abondance', note: 'Gratitude, vision et premier pas.' },
+      { type: 'intro', id: 'dialogue', note: 'Écouter ce que vous savez déjà.' },
+      { type: 'session', id: 'inconscient-soir', note: 'Confier une question à la nuit.' },
+      { type: 'intro', id: 'lettre', note: 'Recevoir une lettre de votre futur.' },
+      { type: 'session', id: 'nouvelle-image', note: 'Retour au miroir : l’image s’est affermie.' },
+      { type: 'affirm', id: 'affirm', note: 'Écoutez vos affirmations, et mesurez le chemin parcouru.' },
+    ],
+  },
+  {
+    id: 'abondance-7',
+    title: '7 jours vers l’abondance',
+    color: 'var(--c-energy)',
+    pitch: 'Assainir votre relation à l’argent : croyances, valeurs, vision claire et vrais pas concrets.',
+    days: [
+      { type: 'intro', id: 'croyances-argent', note: 'D’où viennent vos croyances sur l’argent ?' },
+      { type: 'session', id: 'abondance', note: 'Gratitude, vision et premier pas.' },
+      { type: 'affirm', id: 'affirm', note: 'Sélectionnez le thème « Richesse et abondance ».' },
+      { type: 'intro', id: 'valeurs', note: 'Ce que l’argent doit servir chez vous.' },
+      { type: 'session', id: 'theatre', note: 'Répéter une négociation ou une demande.' },
+      { type: 'session', id: 'decision', note: 'Passer une décision financière au crible des biais.' },
+      { type: 'affirm', id: 'affirm', note: 'Vos affirmations, au coucher.' },
+    ],
+  },
   {
     id: 'stress',
     title: '7 jours pour apprivoiser le stress',

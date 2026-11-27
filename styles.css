@@ -597,3 +597,65 @@ a.pill { text-decoration: none; }
 .sticky-cta { background: var(--ground); border-top: 1px solid var(--rule); box-shadow: 0 -18px 30px -12px var(--ground); padding-top: 0.9rem; }
 .sticky-cta .field { font-size: 0.85rem; }
 body:not([data-screen="accueil"]) #install { display: none; }
+
+/* =========================================================
+   Reprogrammer : affirmations, introspection
+   ========================================================= */
+:root { --c-self: #f0a7d0; }
+.tile.wide { grid-column: span 2; min-height: 104px; background: linear-gradient(120deg, color-mix(in srgb, var(--c-self) 18%, var(--surface)), color-mix(in srgb, var(--c-hyp) 10%, var(--surface))); border-color: color-mix(in srgb, var(--c-self) 35%, var(--rule)); }
+.tile.wide span { color: var(--muted); }
+.quote { font-family: var(--serif) !important; font-weight: 500 !important; font-style: italic; }
+.card-row .tx strong.quote { font-size: 1rem; line-height: 1.4; }
+.item.big { padding: 1.05rem 1rem; }
+.item .ic { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 12px; font-size: 1.2rem; color: var(--fam); background: color-mix(in srgb, var(--fam) 14%, var(--surface-2)); }
+.item.big .tx strong { font-size: 1.05rem; }
+.hub { margin-top: 1.2rem; }
+
+.daily { padding: 1.2rem 1.2rem 1rem; border-radius: 16px; margin: 0.4rem 0 0.4rem; background: linear-gradient(140deg, color-mix(in srgb, var(--c-self) 16%, var(--surface)), var(--surface)); border: 1px solid color-mix(in srgb, var(--c-self) 35%, var(--rule)); }
+.daily .eyebrow { color: var(--c-self); margin-bottom: 0.4rem; }
+.big-quote { font: italic 500 clamp(1.2rem, 4.6vw, 1.5rem)/1.45 var(--serif); margin: 0 0 1rem; }
+.daily textarea { width: 100%; font: italic 500 1.1rem/1.45 var(--serif); color: var(--ink); background: rgba(0,0,0,0.25); border: 1px solid var(--rule); border-radius: 10px; padding: 0.7rem 0.8rem; }
+.item.aff { gap: 0.6rem; padding: 0.7rem 0.6rem 0.7rem 0.9rem; }
+.item.aff .tx strong { font-size: 0.98rem; line-height: 1.45; }
+.item.aff.on { border-color: color-mix(in srgb, var(--fam) 60%, var(--rule)); background: color-mix(in srgb, var(--fam) 7%, var(--surface)); }
+.icon-btn, .star { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--rule); background: var(--surface-2); color: var(--muted); cursor: pointer; font-size: 0.85rem; display: grid; place-items: center; }
+.icon-btn:hover, .star:hover { color: var(--ink); border-color: var(--faint); }
+.star { font-size: 1.15rem; color: var(--fam); background: transparent; border-color: transparent; }
+.badge { display: inline-block; align-self: flex-start; margin-top: 0.3rem; font: 500 0.62rem var(--mono); text-transform: uppercase; letter-spacing: 0.08em; padding: 0.12rem 0.45rem; border-radius: 99px; color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); }
+.aff-play { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 0.9rem 0 0.2rem; padding: 1rem; border-radius: 14px; background: var(--surface); border: 1px solid var(--rule); }
+.aff-play .btn.big { margin-top: 0.4rem; }
+.aff-play .hint { width: 100%; margin: 0.4rem 0 0; }
+.seg.small { margin: 0; }
+.seg.small label { padding: 0.4rem 0.75rem; font-size: 0.82rem; }
+.aff-write { display: flex; gap: 0.5rem; align-items: stretch; }
+.aff-write textarea { flex: 1; font: 400 1rem var(--serif); color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 0.7rem 0.8rem; resize: vertical; }
+.tips { display: grid; grid-template-columns: max-content 1fr; gap: 0.45rem 1rem; margin: 0.4rem 0; font-size: 0.92rem; }
+.tips dt { font: 600 0.85rem var(--display); color: var(--accent); }
+.tips dd { margin: 0; color: var(--muted); }
+
+.ex-head .eyebrow { margin-bottom: 0.4rem; }
+.ex-head .q-bar { --fam: var(--fam); margin: 0 0 1.4rem; }
+.ex-q { font-size: clamp(1.35rem, 5vw, 1.75rem); line-height: 1.25; margin: 0 0 0.6rem; }
+.ex-field { margin: 1rem 0 1.2rem; }
+.ex-field textarea { width: 100%; font: 400 1.05rem/1.55 var(--serif); color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 0.9rem 1rem; resize: vertical; }
+.ex-field textarea:focus { border-color: var(--fam); outline: none; }
+.ex-field .scale-val { display: block; text-align: center; font: 300 3rem var(--display); color: var(--fam); }
+.ex-field input[type=range] { accent-color: var(--fam); }
+.ex-nav { display: flex; justify-content: space-between; gap: 0.6rem; }
+.ex-nav .btn.primary { flex: 1; max-width: 260px; margin-left: auto; padding: 0.85rem 1.2rem; }
+.mt-s { margin-top: 0.7rem; }
+.shake { animation: shake .35s; }
+@keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.qa dt { text-transform: none; letter-spacing: 0; font: 500 0.85rem/1.35 var(--display); color: var(--fam); padding-top: 0; }
+.bias-dl.qa { grid-template-columns: 1fr; gap: 0.2rem; }
+.bias-dl.qa dd { margin-bottom: 0.8rem; white-space: pre-wrap; }
+.j-item.qa dl { grid-template-columns: 1fr; gap: 0.15rem; }
+.j-item.qa dt { text-transform: none; font: 500 0.8rem var(--display); color: var(--fam); }
+.j-item.qa dd { margin-bottom: 0.6rem; }
+@media (max-width: 620px) {
+  .tips { grid-template-columns: 1fr; gap: 0.1rem; }
+  .tips dd { margin-bottom: 0.5rem; }
+  .aff-write { flex-direction: column; }
+}
+.ex-field .opts.toggles { grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+.ex-field .opts.toggles .opt { padding: 0.6rem 0.7rem; font-size: 0.92rem; }

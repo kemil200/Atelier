@@ -4,6 +4,8 @@ import { BIASES, BIAS_FAMILIES, DISTORTIONS, biasOfTheDay } from './biases.js';
 import { EXPERIMENTS, runExperiment } from './lab.js';
 import { renderQuiz } from './quiz.js';
 import { PROGRAMS } from './programs.js';
+import { THEMES, ALL_AFFIRMATIONS, affirmationOfTheDay, TIPS } from './affirmations.js';
+import { EXERCISES } from './introspection.js';
 import { Voice, listVoices, clearVoiceCache, voiceCacheSize, frenchVoices } from './voice.js';
 import { Visuals } from './visuals.js';
 import { Ambient, BEATS } from './ambient.js';
@@ -57,6 +59,10 @@ const ROUTES = {
   programme: { parent: '#parcours' },
   journal: { title: 'Journal', parent: '#accueil' },
   reglages: { title: 'Réglages', parent: '#accueil' },
+  esprit: { title: 'Reprogrammer', parent: '#accueil' },
+  affirmations: { title: 'Affirmations', parent: '#esprit' },
+  introspection: { title: 'Introspection', parent: '#esprit', detail: 'exercice' },
+  exercice: { parent: '#introspection' },
 };
 const stack = [];
 const scrolls = {};
@@ -64,7 +70,7 @@ let current = null;
 
 function parse(hash) {
   const [base0, param] = hash.replace(/^#\/?/, '').split('/');
-  const base = ROUTES[base0] && !['seance', 'fiche', 'experience', 'programme'].includes(base0) ? base0 : 'accueil';
+  const base = ROUTES[base0] && !['seance', 'fiche', 'experience', 'programme', 'exercice'].includes(base0) ? base0 : 'accueil';
   const screen = param && ROUTES[base].detail ? ROUTES[base].detail : base;
   return { base, screen, param, hash: `#${base}${param ? `/${param}` : ''}` };
 }
@@ -158,6 +164,11 @@ function renderHome() {
   $('#tile-journal').textContent = journal.length ? `${journal.length} ${plural(journal.length, 'séance')}` : 'Vos progrès';
   $('#stats').innerHTML = statsHtml();
 
+  const a = affirmationOfTheDay(affState().custom);
+  const ha = $('#home-affirm');
+  ha.style.setProperty('--fam', 'var(--c-self)');
+  ha.innerHTML = `<span class="ic" aria-hidden="true">✦</span><span class="tx"><span class="eyebrow">Affirmation du jour</span><strong class="quote">« ${esc(a.je)} »</strong><span>Écouter, choisir les vôtres</span></span><span class="chev" aria-hidden="true">›</span>`;
+
   const b = biasOfTheDay();
   const hb = $('#home-bias');
   hb.href = `#biais/${b.id}`;
@@ -170,7 +181,7 @@ function renderHome() {
     hp.href = '#parcours';
     hp.style.setProperty('--fam', 'var(--c-mind)');
     hp.innerHTML = `<span class="ic" aria-hidden="true">🧭</span><span class="tx"><span class="eyebrow">Parcours</span><strong>Une activité par jour</strong><span>Stress, clarté, sommeil ou élan : choisissez un programme.</span></span><span class="chev" aria-hidden="true">›</span>`;
-    $('#tile-program').textContent = '4 programmes';
+    $('#tile-program').textContent = `${PROGRAMS.length} programmes`;
   } else if (st.i < 0) {
     hp.href = '#parcours';
     hp.style.setProperty('--fam', st.pr.color);
@@ -401,15 +412,324 @@ function renderQuizPage() {
   $('#quiz-go').onclick = () => { el.dataset.started = '1'; renderQuiz(el); };
 }
 
+/* ---------- Reprogrammer : hub ---------- */
+function renderHub() {
+  const st = affState();
+  const listens = journal.filter((e) => e.sid === 'affirmations').length;
+  $('#hub-affirm').textContent = st.selected.length
+    ? `${st.selected.length} dans votre sélection · ${listens} écoute${listens > 1 ? 's' : ''}`
+    : 'Choisissez, écrivez et écoutez vos phrases de reprogrammation.';
+  const introDone = new Set(journal.filter((e) => e.kind === 'intro').map((e) => e.sid));
+  $('#hub-intro').textContent = introDone.size ? `${introDone.size} exercice${introDone.size > 1 ? 's' : ''} fait${introDone.size > 1 ? 's' : ''} sur ${EXERCISES.length}` : `${EXERCISES.length} exercices d'écriture guidée : croyances, valeurs, blessures, futur.`;
+  const d21 = programs.done['image-21'] || [];
+  $('#hub-21').textContent = programs.active === 'image-21' ? `En cours · jour ${Math.min(d21.length + 1, 21)}/21` : d21.length ? `${d21.length}/21 jours faits` : 'Un programme complet, une activité par jour.';
+  const done = new Set(journal.map((e) => e.sid));
+  $('#hub-sessions').innerHTML = SESSIONS.filter((s) => s.family === 'soi').map((s) => `
+    <a class="item" href="#seances/${s.id}" style="--fam:${FAMILIES.soi.color}">
+      <span class="dot"></span>
+      <span class="tx"><strong>${esc(s.title)}${done.has(s.id) ? ' <em class="ok">✓</em>' : ''}</strong><span>${esc(s.pitch)}</span></span>
+      <span class="meta-r">${s.minutes} min</span>
+      <span class="chev" aria-hidden="true">›</span>
+    </a>`).join('');
+}
+
+/* ---------- Affirmations ---------- */
+function affState() {
+  return { selected: [], custom: [], person: 'je', reps: 3, mode: 'now', theme: 'image', ...store.get('affirm', {}) };
+}
+function saveAff(st) { store.set('affirm', st); }
+function affById(id, st = affState()) {
+  return ALL_AFFIRMATIONS.find((a) => a.id === id) || st.custom.find((c) => c.id === id);
+}
+const affText = (a, person) => (person === 'tu' && a.tu ? a.tu : a.je);
+
+function renderAffirmations() {
+  const st = affState();
+  // Affirmation du jour
+  const day = affirmationOfTheDay(st.custom);
+  const inSel = st.selected.includes(day.id);
+  $('#aff-daily').innerHTML = `
+    <p class="eyebrow">Affirmation du jour</p>
+    <p class="big-quote">« ${esc(affText(day, st.person))} »</p>
+    <div class="row">
+      <button class="btn small primary" data-speak="${esc(day.id)}">▶ Écouter</button>
+      <button class="btn small${inSel ? ' ghost' : ''}" data-toggle="${esc(day.id)}">${inSel ? '★ Dans ma sélection' : '☆ Ajouter à ma sélection'}</button>
+    </div>`;
+
+  // Sélection
+  const sel = st.selected.map((id) => affById(id, st)).filter(Boolean);
+  $('#aff-count').textContent = `(${sel.length})`;
+  $('#aff-selection').innerHTML = sel.length ? sel.map((a) => `
+    <div class="item aff" style="--fam:${THEMES.find((t) => t.id === a.theme)?.color || 'var(--c-self)'}">
+      <span class="dot"></span>
+      <span class="tx"><strong class="quote">${esc(affText(a, st.person))}</strong></span>
+      <button class="icon-btn" data-speak="${esc(a.id)}" aria-label="Écouter">▶</button>
+      <button class="icon-btn" data-toggle="${esc(a.id)}" aria-label="Retirer de la sélection">✕</button>
+    </div>`).join('') : '<p class="empty">Votre sélection est vide. Choisissez des affirmations dans les thèmes ci-dessous, ou écrivez la vôtre.</p>';
+
+  // Options de lecture
+  const f = $('#aff-play');
+  f.person.value = st.person;
+  f.reps.value = String(st.reps);
+  f.mode.value = st.mode;
+  $('#aff-go').disabled = !sel.length;
+  const sec = sel.length * st.reps * 7 + 45;
+  $('#aff-est').textContent = sel.length ? `Environ ${Math.max(1, Math.round(sec / 60))} min · ${st.mode === 'soir' ? 'termine sans réveil, pour s’endormir' : 'avec une courte relaxation au début'}` : '';
+
+  // Thèmes
+  $('#aff-themes').innerHTML = [...THEMES, ...(st.custom.length ? [{ id: 'perso', title: `Mes phrases (${st.custom.length})`, color: 'var(--accent)' }] : [])]
+    .map((t) => `<button class="pill${st.theme === t.id ? ' on' : ''}" data-theme="${t.id}" style="--fam:${t.color}">${t.icon ? t.icon + ' ' : ''}${esc(t.title)}</button>`).join('');
+  const theme = THEMES.find((t) => t.id === st.theme);
+  $('#aff-theme-intro').textContent = theme ? theme.intro : 'Les affirmations que vous avez écrites.';
+  const items = theme ? ALL_AFFIRMATIONS.filter((a) => a.theme === theme.id) : st.custom;
+  $('#aff-list').innerHTML = items.map((a) => {
+    const on = st.selected.includes(a.id);
+    return `
+    <div class="item aff${on ? ' on' : ''}" style="--fam:${theme?.color || 'var(--accent)'}">
+      <button class="star" data-toggle="${esc(a.id)}" aria-pressed="${on}" aria-label="${on ? 'Retirer de' : 'Ajouter à'} ma sélection">${on ? '★' : '☆'}</button>
+      <span class="tx"><strong class="quote">${esc(affText(a, st.person))}</strong>${a.pont ? '<span class="badge">pont</span>' : ''}</span>
+      <button class="icon-btn" data-speak="${esc(a.id)}" aria-label="Écouter">▶</button>
+      ${theme ? '' : `<button class="icon-btn" data-delete="${esc(a.id)}" aria-label="Supprimer">🗑</button>`}
+    </div>`;
+  }).join('') || '<p class="empty">Aucune phrase.</p>';
+
+  $('#aff-tips').innerHTML = TIPS.map(([t, d]) => `<dt>${esc(t)}</dt><dd>${esc(d)}</dd>`).join('');
+}
+
+$('section[data-screen="affirmations"]').addEventListener('click', async (e) => {
+  const st = affState();
+  const t = e.target.closest('[data-toggle]');
+  const sp = e.target.closest('[data-speak]');
+  const th = e.target.closest('[data-theme]');
+  const del = e.target.closest('[data-delete]');
+  if (t) {
+    const id = t.dataset.toggle;
+    st.selected = st.selected.includes(id) ? st.selected.filter((x) => x !== id) : [...st.selected, id];
+    saveAff(st);
+    renderAffirmations();
+  } else if (th) {
+    st.theme = th.dataset.theme;
+    saveAff(st);
+    renderAffirmations();
+  } else if (del) {
+    if (!confirm('Supprimer cette affirmation ?')) return;
+    st.custom = st.custom.filter((c) => c.id !== del.dataset.delete);
+    st.selected = st.selected.filter((x) => x !== del.dataset.delete);
+    if (!st.custom.length && st.theme === 'perso') st.theme = 'image';
+    saveAff(st);
+    renderAffirmations();
+  } else if (sp) {
+    const a = affById(sp.dataset.speak, st);
+    if (!a) return;
+    audio();
+    voice.fallback = false;
+    sp.disabled = true;
+    try { await voice.speak(affText(a, st.person)); } finally { sp.disabled = false; }
+  }
+});
+
+$('#aff-play').addEventListener('change', (e) => {
+  const st = affState();
+  const f = e.currentTarget;
+  st.person = f.person.value || 'je';
+  st.reps = +(f.reps.value || 3);
+  st.mode = f.mode.value || 'now';
+  saveAff(st);
+  renderAffirmations();
+});
+$('#aff-play').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const st = affState();
+  const list = st.selected.map((id) => affById(id, st)).filter(Boolean);
+  if (list.length) runSession(affirmSession(list, st), null);
+});
+$('#aff-write').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const text = e.target.text.value.trim();
+  if (!text) return;
+  addCustomAffirmation(text);
+  e.target.reset();
+  toast('Affirmation ajoutée à votre sélection.');
+});
+
+function addCustomAffirmation(text) {
+  const st = affState();
+  const clean = text.replace(/^["«\s]+|["»\s]+$/g, '');
+  if (st.custom.some((c) => c.je === clean)) return;
+  const id = `perso-${Date.now()}`;
+  st.custom.push({ id, je: clean, theme: 'perso' });
+  st.selected.push(id);
+  saveAff(st);
+}
+
+function affirmSession(list, st) {
+  const soir = st.mode === 'soir';
+  const reps = Math.max(1, st.reps);
+  const steps = [
+    { v: 'breath', say: soir
+      ? 'Allongez-vous confortablement. Ces phrases vont accompagner votre endormissement, ce moment où l’esprit est le plus réceptif.'
+      : 'Installez-vous confortablement. Pour chaque phrase, écoutez, répétez-la intérieurement, et laissez-vous la ressentir comme déjà vraie.', wait: 1 },
+    { breath: { in: 4, out: 6, cycles: 3, cues: 0 } },
+  ];
+  list.forEach((a, i) => {
+    const text = affText(a, st.person);
+    for (let r = 0; r < reps; r++) {
+      steps.push({ ...(i === 0 && r === 0 ? { v: soir ? 'fixation' : 'glow', vo: soir ? { dim: 0.7 } : {} } : {}), say: text, wait: r === reps - 1 ? 5 : 3 });
+    }
+  });
+  steps.push(soir
+    ? { vo: { dim: 1 }, say: 'Laissez ces phrases descendre en vous… et glissez doucement vers le sommeil.', wait: 20 }
+    : { say: 'Gardez ces phrases avec vous aujourd’hui. Et choisissez un geste concret qui va dans leur sens.', wait: 2 });
+  const minutes = Math.max(1, Math.round((list.length * reps * 7 + 45) / 60));
+  return { id: 'affirmations', kind: 'affirm', title: soir ? 'Affirmations du soir' : 'Mes affirmations', family: 'soi', minutes, sleep: soir, steps };
+}
+
+/* ---------- Introspection ---------- */
+function renderIntroList() {
+  const counts = {};
+  journal.filter((e) => e.kind === 'intro').forEach((e) => (counts[e.sid] = (counts[e.sid] || 0) + 1));
+  $('#intro-list').innerHTML = EXERCISES.map((x) => {
+    const n = counts[`intro:${x.id}`] || 0;
+    const draft = store.get(`draft.${x.id}`, null);
+    return `
+    <a class="item" href="#introspection/${x.id}" style="--fam:${x.color}">
+      <span class="dot"></span>
+      <span class="tx"><strong>${esc(x.title)}${n ? ` <em class="ok">✓${n > 1 ? ` ×${n}` : ''}</em>` : ''}</strong><span>${esc(x.intro)}</span>${draft ? '<span class="badge">brouillon en cours</span>' : ''}</span>
+      <span class="meta-r">${x.minutes} min</span>
+      <span class="chev" aria-hidden="true">›</span>
+    </a>`;
+  }).join('');
+}
+
+function renderExercise(id) {
+  const x = EXERCISES.find((e) => e.id === id);
+  if (!x) return go('#introspection');
+  setTitle(x.title);
+  const el = $('#exercise-panel');
+  el.style.setProperty('--fam', x.color);
+  const draft = store.get(`draft.${id}`, { i: -1, a: {}, t0: Date.now() });
+  const saveDraft = () => store.set(`draft.${id}`, draft);
+
+  const showIntro = () => {
+    el.innerHTML = `
+      <div class="hero-mini"><p class="eyebrow"><span class="dot"></span>Introspection · ${x.steps.length} questions · ${x.minutes} min</p>
+      <h2>${esc(x.title)}</h2>
+      <p class="lead">${esc(x.intro)}</p></div>
+      <h3 class="section-t">Pourquoi cet exercice</h3>
+      <p class="muted">${esc(x.why)}</p>
+      <p class="hint">Installez-vous dans un endroit calme. Il n’y a pas de bonne réponse : écrivez ce qui vient.</p>
+      <button class="btn primary big" id="ex-start">${draft.i >= 0 ? 'Reprendre où j’en étais' : 'Commencer'}</button>
+      ${draft.i >= 0 ? '<button class="btn ghost small mt-s" id="ex-restart">Recommencer à zéro</button>' : ''}`;
+    $('#ex-start').onclick = () => { if (draft.i < 0) { draft.i = 0; draft.t0 = Date.now(); } saveDraft(); showStep(); };
+    $('#ex-restart')?.addEventListener('click', () => { Object.assign(draft, { i: 0, a: {}, t0: Date.now() }); saveDraft(); showStep(); });
+  };
+
+  const field = (s) => {
+    const v = draft.a[s.key];
+    if (s.type === 'scale') return `<span class="scale-val" id="ex-val">${v ?? 5}</span><input type="range" id="ex-field" min="0" max="10" value="${v ?? 5}">`;
+    if (s.type === 'choices') return `<div class="opts toggles" id="ex-field">${s.options.map((o) => `<button type="button" class="opt" aria-pressed="${(v || []).includes(o)}">${esc(o)}</button>`).join('')}</div>`;
+    const rows = s.type === 'long' ? 10 : s.type === 'list' ? 4 : 4;
+    return `<textarea id="ex-field" rows="${rows}" placeholder="${s.type === 'list' ? 'Une réponse par ligne' : 'Écrivez ici…'}">${esc(Array.isArray(v) ? v.join('\n') : v || '')}</textarea>`;
+  };
+  const read = (s) => {
+    if (s.type === 'scale') return +$('#ex-field').value;
+    if (s.type === 'choices') return $$('#ex-field .opt[aria-pressed="true"]').map((b) => b.textContent);
+    const v = $('#ex-field').value.trim();
+    return s.type === 'list' ? v.split('\n').map((l) => l.trim()).filter(Boolean) : v;
+  };
+
+  const showStep = () => {
+    const s = x.steps[draft.i];
+    el.innerHTML = `
+      <div class="ex-head"><p class="eyebrow">Question ${draft.i + 1} sur ${x.steps.length}</p><div class="q-bar"><span style="width:${(draft.i / x.steps.length) * 100}%"></span></div></div>
+      <h2 class="ex-q">${esc(s.q)}</h2>
+      ${s.hint ? `<p class="hint">${esc(s.hint)}</p>` : ''}
+      <div class="ex-field">${field(s)}</div>
+      <div class="ex-nav">
+        <button class="btn ghost" id="ex-prev">${draft.i ? '‹ Précédente' : '‹ Présentation'}</button>
+        <button class="btn primary" id="ex-next">${draft.i + 1 < x.steps.length ? 'Suivante ›' : 'Terminer'}</button>
+      </div>`;
+    if (s.type === 'scale') $('#ex-field').oninput = (e) => ($('#ex-val').textContent = e.target.value);
+    if (s.type === 'choices') $$('#ex-field .opt').forEach((b) => (b.onclick = () => b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true')));
+    const f = $('#ex-field');
+    if (f.tagName === 'TEXTAREA') {
+      f.focus();
+      f.oninput = () => { draft.a[s.key] = read(s); saveDraft(); };
+    }
+    $('#ex-prev').onclick = () => {
+      draft.a[s.key] = read(s);
+      draft.i--;
+      saveDraft();
+      draft.i < 0 ? (draft.i = 0, showIntro()) : showStep();
+    };
+    $('#ex-next').onclick = () => {
+      const v = read(s);
+      const empty = v === '' || (Array.isArray(v) && !v.length);
+      if (empty && !s.optional && s.type !== 'scale') {
+        f.classList.add('shake');
+        setTimeout(() => f.classList.remove('shake'), 400);
+        return toast('Écrivez quelques mots, même imparfaits, pour continuer.');
+      }
+      draft.a[s.key] = v;
+      draft.i++;
+      saveDraft();
+      draft.i < x.steps.length ? showStep() : showEnd();
+      scrollTo({ top: 0, behavior: 'instant' });
+    };
+  };
+
+  const showEnd = () => {
+    const sugg = x.affirm ? draft.a[x.affirm] : '';
+    const fmt = (v) => (Array.isArray(v) ? v.join(', ') : v === '' || v == null ? '—' : String(v));
+    el.innerHTML = `
+      <div class="hero-mini"><p class="eyebrow"><span class="dot"></span>Exercice terminé</p>
+      <h2>${esc(x.title)}</h2>
+      <p class="lead">${esc(x.outro)}</p></div>
+      ${sugg ? `
+      <div class="daily">
+        <p class="eyebrow">Votre affirmation</p>
+        <textarea id="ex-aff" rows="2">${esc(String(sugg))}</textarea>
+        <label class="check"><input type="checkbox" id="ex-aff-add" checked> L’ajouter à mes affirmations</label>
+      </div>` : ''}
+      <h3 class="section-t">Vos réponses</h3>
+      <dl class="bias-dl qa">${x.steps.map((s) => `<dt>${esc(s.q)}</dt><dd>${esc(fmt(draft.a[s.key]))}</dd>`).join('')}</dl>
+      <button class="btn primary big" id="ex-save">Enregistrer dans le journal</button>
+      <button class="btn ghost small mt-s" id="ex-edit">‹ Revoir mes réponses</button>`;
+    $('#ex-edit').onclick = () => { draft.i = x.steps.length - 1; saveDraft(); showStep(); };
+    $('#ex-save').onclick = () => {
+      journal.push({
+        sid: `intro:${x.id}`, kind: 'intro', title: x.title, family: 'soi', date: new Date().toISOString(),
+        minutes: Math.max(1, Math.round((Date.now() - (draft.t0 || Date.now())) / 60000)), avant: null, apres: null,
+        qa: x.steps.map((s) => ({ q: s.q, a: fmt(draft.a[s.key]) })),
+      });
+      store.set('journal', journal);
+      const aff = $('#ex-aff')?.value.trim();
+      const added = !!(aff && $('#ex-aff-add')?.checked);
+      if (added) addCustomAffirmation(aff);
+      localStorage.removeItem(`atelier.draft.${x.id}`);
+      emit('complete', { type: 'intro', id: x.id });
+      el.innerHTML = `
+        <div class="hero-mini"><p class="eyebrow"><span class="dot"></span>Enregistré</p>
+        <h2>Merci pour ce temps avec vous-même.</h2>
+        <p class="lead">Vos réponses sont dans le journal${added ? ', et votre affirmation dans votre sélection' : ''}.</p></div>
+        <div class="actions"><a class="btn primary" href="#affirmations">Écouter mes affirmations</a><a class="btn" href="#journal">Voir le journal</a><a class="btn ghost" href="#introspection">Autres exercices</a></div>`;
+    };
+  };
+
+  draft.i >= x.steps.length ? showEnd() : showIntro();
+}
+
 /* ---------- Parcours ---------- */
 function itemTitle(it) {
+  if (it.type === 'intro') return `Introspection « ${EXERCISES.find((s) => s.id === it.id)?.title} »`;
+  if (it.type === 'affirm') return 'Écouter vos affirmations';
   if (it.type === 'session') return `Séance « ${SESSIONS.find((s) => s.id === it.id)?.title} »`;
   if (it.type === 'lab') return `Expérience « ${EXPERIMENTS.find((s) => s.id === it.id)?.title} »`;
   if (it.type === 'bias') return `Fiche « ${BIASES.find((s) => s.id === it.id)?.name} »`;
   return 'Quiz « Repérez le biais »';
 }
 function itemHref(it) {
-  return { session: `#seances/${it.id}`, lab: `#labo/${it.id}`, bias: `#biais/${it.id}`, quiz: '#quiz' }[it.type];
+  return { session: `#seances/${it.id}`, lab: `#labo/${it.id}`, bias: `#biais/${it.id}`, quiz: '#quiz', intro: `#introspection/${it.id}`, affirm: '#affirmations' }[it.type];
 }
 
 function renderPrograms() {
@@ -486,6 +806,8 @@ const NOTE_LABELS = {
   soucis: 'Déposé avant de dormir', bonnes: 'Bonnes choses', decision: 'Décision', penchant: 'Penchant', premortem: 'Pré-mortem',
   zero: 'En partant de zéro', argcontre: 'Argument contraire', ami: 'Conseil à un ami', dix: '10-10-10',
   tache: 'Tâche', geste: 'Premier geste', quand: 'Plan',
+  scene: 'Scène répétée', succes: 'Succès', qualites: 'Qualités', defi: 'Défi', mots: 'Nouvelle image',
+  gesteimage: 'Geste cohérent', question: 'Question pour la nuit', ressources: 'Ressources', vision: 'Vision financière', action: 'Action',
 };
 
 function renderJournal() {
@@ -514,11 +836,13 @@ function renderJournal() {
   const items = [...journal].reverse().slice(0, 80).map((e) => {
     const fam = FAMILIES[e.family] || FAMILIES.apaiser;
     const d = e.avant != null && e.apres != null ? e.apres - e.avant : null;
-    const notes = Object.entries(e.notes || {}).filter(([k, v]) => NOTE_LABELS[k] && v !== '' && v != null && !(Array.isArray(v) && !v.length));
-    return `<li><details class="j-item" style="--fam:${fam.color}">
-      <summary><span class="when">${fmt.format(new Date(e.date))}</span><span class="name">${esc(e.title)}</span>
+    const notes = e.qa
+      ? e.qa.filter((x) => x.a && x.a !== '—').map((x) => [x.q, x.a])
+      : Object.entries(e.notes || {}).filter(([k, v]) => NOTE_LABELS[k] && v !== '' && v != null && !(Array.isArray(v) && !v.length)).map(([k, v]) => [NOTE_LABELS[k], v]);
+    return `<li><details class="j-item${e.qa ? ' qa' : ''}" style="--fam:${fam.color}">
+      <summary><span class="when">${fmt.format(new Date(e.date))}</span><span class="name">${e.kind === 'intro' ? '✎ ' : ''}${esc(e.title)}</span>
       <span class="delta">${e.avant == null && e.apres == null ? `${e.minutes} min` : `${e.avant ?? '–'} → ${e.apres ?? '–'}`}${d != null ? ` <b class="${d < 0 ? 'down' : d > 0 ? 'up' : ''}">${d > 0 ? '+' : ''}${d}</b>` : ''}</span></summary>
-      ${notes.length ? `<dl>${notes.map(([k, v]) => `<dt>${NOTE_LABELS[k]}</dt><dd>${esc(Array.isArray(v) ? v.join('\n') : v)}</dd>`).join('')}</dl>` : '<p class="hint">Pas de notes pour cette séance.</p>'}
+      ${notes.length ? `<dl>${notes.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(Array.isArray(v) ? v.join('\n') : v)}</dd>`).join('')}</dl>` : '<p class="hint">Pas de notes pour cette séance.</p>'}
     </details></li>`;
   }).join('');
   el.innerHTML = `${spark}<ul class="j-list">${items}</ul>
@@ -777,7 +1101,7 @@ async function runSession(s, avant) {
   const save = (apres) => {
     journal.push({ sid: s.id, title: s.title, family: s.family, date: new Date().toISOString(), minutes, avant, apres, notes: cleanNotes(player.inputs) });
     store.set('journal', journal);
-    emit('complete', { type: 'session', id: s.id });
+    emit('complete', s.kind === 'affirm' ? { type: 'affirm', id: 'affirm' } : { type: 'session', id: s.id });
   };
   if (avant == null) {
     // Sommeil et minuteur : pas de question, enregistrement direct.
@@ -1025,6 +1349,10 @@ const RENDER = {
   parcours: renderPrograms,
   programme: renderProgramDetail,
   journal: renderJournal,
+  esprit: renderHub,
+  affirmations: renderAffirmations,
+  introspection: renderIntroList,
+  exercice: renderExercise,
 };
 
 // Anciens liens : ?seance=… et #biais/pieges
